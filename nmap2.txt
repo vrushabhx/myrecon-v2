@@ -1,0 +1,100 @@
+hi
+Starting Nmap 7.70 ( https://nmap.org ) at 2019-06-24 17:48 IST
+NSE: Loaded 44 scripts for scanning.
+NSE: Script Pre-scanning.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 0.00s elapsed
+Initiating SYN Stealth Scan at 17:48
+Scanning localhost (127.0.0.1) [1000 ports]
+Discovered open port 111/tcp on 127.0.0.1
+Completed SYN Stealth Scan at 17:48, 0.06s elapsed (1000 total ports)
+Initiating Service scan at 17:48
+Scanning 1 service on localhost (127.0.0.1)
+Completed Service scan at 17:48, 6.00s elapsed (1 service on 1 host)
+NSE: Script scanning 127.0.0.1.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 15.02s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 0.00s elapsed
+Nmap scan report for localhost (127.0.0.1)
+Host is up, received localhost-response (0.000010s latency).
+Scanned at 2019-06-24 17:48:17 IST for 22s
+Not shown: 999 closed ports
+Reason: 999 resets
+PORT    STATE SERVICE REASON         VERSION
+111/tcp open  rpcbind syn-ack ttl 64 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version   port/proto  service
+|   100000  2,3,4        111/tcp  rpcbind
+|_  100000  2,3,4        111/udp  rpcbind
+
+NSE: Script Post-scanning.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:48
+Completed NSE at 17:48, 0.00s elapsed
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.70 seconds
+           Raw packets sent: 1000 (44.000KB) | Rcvd: 2001 (84.044KB)
+Completed NSE at 17:51, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:51
+Completed NSE at 17:51, 0.00s elapsed
+Initiating SYN Stealth Scan at 17:51
+Scanning localhost (127.0.0.1) [1000 ports]
+Discovered open port 111/tcp on 127.0.0.1
+Completed SYN Stealth Scan at 17:51, 0.08s elapsed (1000 total ports)
+Initiating Service scan at 17:51
+Scanning 1 service on localhost (127.0.0.1)
+Completed Service scan at 17:52, 6.00s elapsed (1 service on 1 host)
+NSE: Script scanning 127.0.0.1.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 17:52
+Completed NSE at 17:52, 15.02s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:52
+Completed NSE at 17:52, 0.00s elapsed
+Nmap scan report for localhost (127.0.0.1)
+Host is up, received localhost-response (0.000010s latency).
+Scanned at 2019-06-24 17:51:57 IST for 21s
+Not shown: 999 closed ports
+Reason: 999 resets
+PORT    STATE SERVICE REASON         VERSION
+111/tcp open  rpcbind syn-ack ttl 64 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version   port/proto  service
+|   100000  2,3,4        111/tcp  rpcbind
+|_  100000  2,3,4        111/udp  rpcbind
+
+NSE: Script Post-scanning.
+NSE: Starting runlevel 1 (of 2) scan.
+Initiating NSE at 17:52
+Completed NSE at 17:52, 0.00s elapsed
+NSE: Starting runlevel 2 (of 2) scan.
+Initiating NSE at 17:52
+Completed NSE at 17:52, 0.00s elapsed
+Read data files from: /usr/bin/../share/nmap
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.71 seconds
+           Raw packets sent: 1000 (44.000KB) | Rcvd: 2001 (84.044KB)
+PORT    STATE SERVICE VERSION
+80/tcp  open  http    Apache httpd 2.4.38
+|_http-server-header: Apache/2.4.38 (Debian)
+111/tcp open  rpcbind 2-4 (RPC #100000)
+| rpcinfo: 
+|   program version   port/proto  service
+|   100000  2,3,4        111/tcp  rpcbind
+|_  100000  2,3,4        111/udp  rpcbind
+Service Info: Host: 127.0.1.1
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 21.72 seconds

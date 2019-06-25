@@ -1,0 +1,10 @@
+https://login
+https://login
+https://dm
+https://login
+https://pt
+https://qa
+https://int
+https://qa
+https://brody
+https://dev
