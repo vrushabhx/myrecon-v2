@@ -1,8 +1,0 @@
-# Masscan 1.0.4 scan initiated Mon Jun 24 10:07:39 2019
-# Ports scanned: TCP(65536;0-65535) UDP(0;) SCTP(0;) PROTOCOLS(0;)
-Host: 54.201.130.223 ()	Ports: 443/open/tcp////
-Host: 143.204.101.35 ()	Ports: 443/open/tcp////
-Host: 143.204.101.94 ()	Ports: 443/open/tcp////
-Host: 143.204.101.75 ()	Ports: 53/open/tcp////
-Host: 143.204.101.23 ()	Ports: 53/open/tcp////
-# Masscan done at Mon Jun 24 10:09:52 2019

@@ -1,4 +1,0 @@
-www.login.gov
-developers.login.gov
-preview.login.gov
-secure.login.gov

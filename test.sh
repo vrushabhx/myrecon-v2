@@ -1,4 +1,5 @@
 #!/bin/bash
+massdns=/root/scripts/bounty/massdns/bin/massdns
 subdirectory=recon-$(date +"%Y-%m-%d")
 domain=google.com
 clear
@@ -35,11 +36,13 @@ cat 123.txt
 echo -e "\e[93;1m${banner}" 
 echo -e "                       \e[31;1m script by Shubham Chaskar"
 echo "Just a blind test"
+#$massdns 
+#altdns
 }
 write()
 {
 echo "hi" > 123.txt
-read1
+$(read1)
 }
 file()
 {
@@ -47,3 +50,4 @@ touch 123.txt
 write
 }
 file
+massdns
