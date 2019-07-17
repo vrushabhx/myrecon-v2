@@ -5,7 +5,7 @@ domain=google.com
 clear
 banner=`figlet -f slant myrecon`
 echo -e "\e[93;1m${banner}" 
-echo -e "			\e[31;1m script by Shubham Chaskar"
+echo -e "			\e[31;1m script by Shubham Chaskar\033[0m"
 #echo -e "\e[5;92m scan completed successfully\033[0m"
 echo ""
 #if [ -d "./$domain" ]
@@ -25,29 +25,29 @@ echo ""
 
 #ip=`cat masscan.txt | cut -d " " -f 1`
 
-for concat in `cat masscan1.txt`
-do
-	echo "$concat"
-done
+#for concat in `cat masscan1.txt`
+#do
+#	echo "$concat"
+#done
+a=1
+b=`wc -l out.csv | cut -d " " -f 1`
+echo "$b"
+if [ "$b" == 1 ]
+then
+	echo "one"
+else
+	echo "Two"
+fi
 
-read1()
-{
-cat 123.txt
-echo -e "\e[93;1m${banner}" 
-echo -e "                       \e[31;1m script by Shubham Chaskar"
-echo "Just a blind test"
-#$massdns 
-#altdns
-}
-write()
-{
-echo "hi" > 123.txt
-$(read1)
-}
-file()
-{
-touch 123.txt
-write
-}
-file
-massdns
+
+for host1 in `cat seek.com.au_unique1.txt`
+do
+	if [ $(curl -I "$host1" --write-out %{http_code} -m 3 --silent --output /dev/null) == 000 ]
+		then
+			echo "unreachable"
+			echo "Deleting $host1 from file"
+			sed -i "/${host1}/d" seek.com.au_unique.txt
+	else
+		echo "Reachable"
+	fi
+done
