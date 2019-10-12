@@ -14,7 +14,7 @@ IP=`ifconfig wlan0 | grep "inet " | cut -d ' ' -f 10`
 
 girecon()
 {
-   git=`echo "$domain" | cut -d "." -f 1
+   git=`echo "$domain" | cut -d "." -f 1`
    echo -e "\e[92m[~] Slurp will be in action.."
    echo "***************************************************************************************"
    cd /root/go/src/github.com/0xbharath/slurp/
@@ -518,5 +518,3 @@ else
    ipresolve
    portscan
 fi
-
-
