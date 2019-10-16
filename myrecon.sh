@@ -8,18 +8,21 @@ echo " "
 current=`pwd`
 massdns=/root/scripts/bounty/massdns/bin/massdns
 altdns=/root/scripts/bounty/altdns/altdns.py
-ifconfig wlan1 down
-IP=`ifconfig wlan0 | grep "inet " | cut -d ' ' -f 10`
+ifconfig wlan0 down
+IP=`ifconfig wlan1 | grep "inet " | cut -d ' ' -f 10`
 
 
-girecon()
+gitrecon()
 {
+   cd "$current"
+   rm *.csv "$domain"_Bunique.txt "$domain"_unique.txt
    git=`echo "$domain" | cut -d "." -f 1`
    echo -e "\e[92m[~] Slurp will be in action.."
    echo "***************************************************************************************"
    cd /root/go/src/github.com/0xbharath/slurp/
    sleep 3
-   ./slurp domain -t "$domain"
+   ./main domain -t "$domain"
+   ./main keyword -t "$domain"
    echo -e "\e[92m[~] Slurp completed.."
    echo "***************************************************************************************"
    echo -e "\e[92m[~] gitrob will be in  action.."
@@ -56,9 +59,10 @@ wayback()
    echo "***********************************************************************************************"
    cp "$domain"_unique.txt /root/go/src/github.com/tomnomnom/waybackurls/
    cd /root/go/src/github.com/tomnomnom/waybackurls/
-   cat "$domain"_unique.txt | ./waybackurls -no-subs > waybackurls.txt
+   cat "$domain"_unique.txt | ./main -no-subs > waybackurls.txt
    cp waybackurls.txt /"$current"/"$domain"/"$subdirectory"/fuzzing/
    rm waybackurls.txt
+   gitrecon
  #  screenshot
 }
 
@@ -107,11 +111,11 @@ linkfinder()
 	./linkfinder.py -i "$host" -d -o cli >> "$domain"_js_endpoints.txt
    done
    echo -e "\e[92m[~] Found some endpoints.."
-   cp "$domain"_js_endpoints.txt /"$domain"/"$subdirectory"/fuzzing/
+   cp "$domain"_js_endpoints.txt "$current"/"$domain"/"$subdirectory"/fuzzing/
    cat "$domain"_js_endpoints.txt
    rm "$domain"_js_endpoints.txt
  #  filefuzz
-
+   wayback
 }
 
 
@@ -178,6 +182,7 @@ linkfinder()
 
 s3scan()
 {
+   bucket=`echo "$domain" | cut -d "." -f 1`
    echo "**************************************************************************************************"
    echo -e "\e[92m[~] Scanning for s3 bucket.."
    echo -e "\e[92m[~] S3Scanner will be in action.."
@@ -186,7 +191,7 @@ s3scan()
    cp "$domain"_unique.txt /root/scripts/bounty/S3Scanner/
    cd /root/scripts/bounty/S3Scanner/
    sleep 3
-   python ./s3scanner.py --out-file "$domain"_s3scan.txt --dump "$domain"_unique.txt
+   python s3scanner.py --out-file "$domain"_s3scan.txt "$domain"_unique.txt
    if [ -s "$domain"_s3scan.txt ]
    then
 	echo -e "\e[92m[~] Found something interesting.."
@@ -206,12 +211,13 @@ s3scan()
    cd "$current"
    cp "$domain"_unique.txt /root/go/src/github.com/glen-mac/goGetBucket/
    cd /root/go/src/github.com/glen-mac/goGetBucket/
-   ./main -m words.txt -d "$domain"_unique.txt -o "$domain"_bucket.txt -i "$domain"_unique.txt
+   ./main -m lists/all.txt -d "$bucket" -o "$domain"_bucket.txt -i "$domain"_unique.txt
    cp "$domain"_bucket.txt /"$current"/"$domain"/"$subdirectory"/subdomains/
    cat "$domain"_bucket.txt | grep true
    rm "$domain"_bucket.txt
    cd "$current"
    cp "$domain"_unique.txt ../bucket_finder/
+   cd /root/scripts/bounty/bucket_finder/
    ./bucket_finder.rb -v "$domain"_unique.txt -l bucket_finder_op.txt
    cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
    rm bucket_finder_op.txt "$domain"_unique.txt
@@ -351,7 +357,7 @@ subdomain()
    echo "*****************************************************************************************"
    echo -e "\e[93m[~] Subfinder scan will start in 5 seconds.."
    sleep 5
-   subfinder -d "$domain" -t 100 -b -w /usr/share/seclists/Discovery/DNS/subdomains-top1mil-20000.txt -o ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt
+   subfinder -d "$domain" -t 100 -b -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-20000.txt -o ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt
    echo -e "\e[92m[~] Subfinder scan completed"
    echo -e "\e[92m[~] File saved as subfinder_result.txt"
    echo "*****************************************************************************************"
@@ -412,14 +418,16 @@ subdomain()
    echo -e "\e[92m[~] Recce will be in action.."
    cd "$current"
    cp "$domain"_Bunique.txt ../recce/
+   cd /root/scripts/bounty/recce/
    python3 recce.py -f "$domain"_Bunique.txt -t 100 -o "$domain"_unique.txt
+   cp "$domain"_unique.txt "$current"
    echo -e "\e[92m[~] All Host checked.."
    echo -e "\e[92m[~] Total online.."
    cat "$domain"_unique.txt | wc -l
    echo "******************************************************************************************"
-   cp "$domain"_unique.txt ./"$domain"/"$subdirectory"/subdomains/
+   cp "$domain"_unique.txt "$current"/"$domain"/"$subdirectory"/subdomains/
    echo "******************************************************************************************"
-   cd ./"$domain"/"$subdirectory"/subdomains
+   cd "$current"/"$domain"/"$subdirectory"/subdomains
    cp "$domain"_unique.txt aquatone/
    rm -rf amass_output sublist3r.txt amass_result.txt subfinder_result.txt knock_domain.txt massdns.txt massdns_domain.txt altdns.txt massdns_altdns.txt
    cd aquatone/
