@@ -6,30 +6,30 @@ echo -e "			\e[31;1m A script by Shubham Chaskar"
 
 echo " "
 current=`pwd`
-massdns=/root/scripts/bounty/massdns/bin/massdns
-altdns=/root/scripts/bounty/altdns/altdns.py
-ifconfig wlan0 down
-IP=`ifconfig wlan1 | grep "inet " | cut -d ' ' -f 10`
+#massdns=/root/scripts/bounty/massdns/bin/massdns
+#altdns=/root/scripts/bounty/altdns/altdns.py
+#ifconfig wlan0 down
+#IP=`ifconfig wlan1 | grep "inet " | cut -d ' ' -f 10`
 
 
-gitrecon()
-{
-   cd "$current"
-   rm *.csv "$domain"_Bunique.txt "$domain"_unique.txt
-   git=`echo "$domain" | cut -d "." -f 1`
-   echo -e "\e[92m[~] Slurp will be in action.."
-   echo "***************************************************************************************"
-   cd /root/go/src/github.com/0xbharath/slurp/
-   sleep 3
-   ./main domain -t "$domain"
-   ./main keyword -t "$domain"
-   echo -e "\e[92m[~] Slurp completed.."
-   echo "***************************************************************************************"
-   echo -e "\e[92m[~] gitrob will be in  action.."
-   cd /root/go/src/github.com/michenriksen/gitrob/
-   ./main -save "$domain"_gitrob -threads 100 "$git"
-   cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
-}
+#gitrecon()
+#{
+ #  cd "$current"
+ #  rm *.csv "$domain"_Bunique.txt "$domain"_unique.txt
+ #  git=`echo "$domain" | cut -d "." -f 1`
+ #  echo -e "\e[92m[~] Slurp will be in action.."
+ #  echo "***************************************************************************************"
+ #  cd /root/go/src/github.com/0xbharath/slurp/
+ #  sleep 3
+ #  ./main domain -t "$domain"
+ #  ./main keyword -t "$domain"
+ #  echo -e "\e[92m[~] Slurp completed.."
+ #  echo "***************************************************************************************"
+ #  echo -e "\e[92m[~] gitrob will be in  action.."
+ #  cd /root/go/src/github.com/michenriksen/gitrob/
+ #  ./main -save "$domain"_gitrob -threads 100 "$git"
+ #  cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
+#}
 #screenshot()
 #{
 #   cd "$current"
@@ -49,53 +49,110 @@ gitrecon()
 #   rm -rf "$domain"_screenshot
 
 #}
+vulnscan()
+{
+  cd "$current"/"$domain"/"$subdirectory"/subdomain/
+#Jaeles Scanner
+  mkdir ../vulns/jaeles_result
+  jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+#Nuclei Scanner
+  nuclei -c 200 -l 15.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+#XSS parameter scanning
+  cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
+  cat spider_clean_1.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
+  cat spider_clean_2.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
+  cd ../vulns/
+  if [ -s xss_reflection_kxss.txt ]
+  then
+	cat xss_reflection_kxss.txt | dalfox pipe -blind "https://unstable.xss.ht" -o ../vulns/dalfox_result.txt -w 30
+  else
+	echo -e "\e[92m[~] Some error or no reflection has been found..rerun kxss module manually.."
+  fi
 
+#Hidden parameter discovery
+  cp ../subdomain/"$domain"_unique.txt /root/scripts/bounty/Arjun/
+  cd /root/scripts/bounty/Arjun/
+  python3 arjun.py --urls "$domain"_unique.txt --get -t 100 -o arjun_result.json
+  mv arjun_result.json "$current"/"$domain"/"$subdirectory"/vulns/
+
+#gf-patterns and separate files with repect to vulnerabilities
+#SSRF
+  ss=http://ssrftest.com/x/kVTj1
+  cd "$current"/"$domain"/"$subdirectory"/URLs/
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
+  cat ../vulns/possible_ssrf.txt | sed 's|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g' | tee -a ../vulns/possible_ssrf_2.txt
+  ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100
+#IDOR
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
+#SSTI
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf ssti | tee -a ../vulns/possible_ssti.txt
+  cd ../vulns/
+  for line in `cat possible_ssti.txt`;
+  do
+	echo $line && python /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
+  done
+  cd ../URLs/
+#open-redirect
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
+#LFI
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf lfi | tee -a ../vulns/possible_lfi.txt
+#RCE
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf rce | tee -a ../vulns/possible_rce.txt
+#SQLi
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
+  cd ../vulns/
+  mkdir sql_result
+  a=50
+  b=`cat possible_sqli.txt | wc -l`
+  if [ -s possible_sqli.txt ]
+  then
+        echo -e "\e[92m[~] File found with content.."
+	if [ "$a" -gt "$b" ]
+	then
+		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
+	else
+		echo -e "\e[92m[~] File with more than $a line will not be scanned.."
+	fi
+  else
+        echo -e "\e[92m[~] No patterns found for sqli.."
+  fi
+
+}
+
+spider()
+{
+# Crawl all subdomains and filter the result
+   cd "$current"/"$domain"/"$subdirectory"/subdomain/
+   gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r -a
+   cd ../URLs/crawl_data/
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a spider_clean_1.txt
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a spider_clean_2.txt
+   cd ../
+   vulns
+}
 
 wayback()
 {
-   cd "$current"
+   cd "$current"/"$domain"/"$subdirectory"/subdomain
    echo "***********************************************************************************************"
    echo -e "\e[92m[~] Going back in time to search some endpoints.."
    echo -e "\e[92m[~] Waybackurl will be in action.."
    echo "***********************************************************************************************"
-   cp "$domain"_unique.txt /root/go/src/github.com/tomnomnom/waybackurls/
-   cd /root/go/src/github.com/tomnomnom/waybackurls/
-   cat "$domain"_unique.txt | ./main -no-subs > waybackurls.txt
-   cp waybackurls.txt /"$current"/"$domain"/"$subdirectory"/fuzzing/
-   cat waybackurls.txt
-   rm waybackurls.txt
-   gitrecon
+   cat "$domain"_unique.txt | waybackurls -no-subs | tee -a ../URLs/wayback.txt
+   echo "***********************************************************************************************"
+   echo -e "\e[92m[~] Getallurls will be in action.."
+   echo "***********************************************************************************************"
+   cat "$domain"_unique.txt | gau | tee -a ../URLs/gau.txt
+   cd ../URLs/
+   cat wayback.txt gau.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | qsreplace -a | tee -a clean_url.txt
+   spider
  #  screenshot
 }
 
 
-#filefuzz()
-#{
- #  cd "$current"
-  # echo "**********************************************************************************************"
-   #echo -e "\e[92m[~] Finding some juicy files.."
-   #echo -e "\e[92m[~] Meg will start fuzzing.."
-   #echo "**********************************************************************************************"
-   #cp "$domain"_unique.txt /"$current"/"$domain"/"$subdirectory"/fuzzing/
-   #cp paths /"$current"/"$domain"/"$subdirectory"/fuzzing/
-   #cd /"$current"/"$domain"/"$subdirectory"/fuzzing/
-   #cp "$domain"_unique.txt hosts
-   #sed -i 's/^/https:\/\//g' hosts
-   #meg -c 100 -v hosts paths meg_output 
-   #cd meg_output
-   #echo -e "\e[92m[~] Following things found.."
-   #cat index | grep "(200 OK)"
-   #echo "***********************************************************************************************"
-   #cd ../
-   #cp -R meg_output /"$current"/"$domain"/"$subdirectory"/fuzzing/
-   #rm -rf meg_output
-   #wayback
-#}
-
 
 linkfinder()
 {
-   cd "$current"
    echo "***********************************************************************************************"
    echo -e "\e[92m[~] Finding JS files and endpoints.."
    echo -e "\e[92m[~] Linkfinder will be in action.."
@@ -103,19 +160,19 @@ linkfinder()
    cp "$domain"_unique.txt /root/scripts/bounty/LinkFinder/
    cd /root/scripts/bounty/LinkFinder/
    touch "$domain"_js_endpoints.txt
-   sed -i 's/^/https:\/\//' "$domain"_unique.txt
+#   sed -i 's/^/https:\/\//' "$domain"_unique.txt
    for host in `cat "$domain"_unique.txt`
    do
 	echo "******************************************************************************************" >> "$domain"_js_endpoints.txt
 	echo 					"$host"						>> "$domain"_js_endpoints.txt
 	echo "Analysing $host"
 	echo "******************************************************************************************" >> "$domain"_js_endpoints.txt
-	./linkfinder.py -i "$host" -d -o cli >> "$domain"_js_endpoints.txt
+	python3 linkfinder.py -i "$host" -d -o cli >> "$domain"_js_endpoints.txt
    done
    echo -e "\e[92m[~] Found some endpoints.."
-   cp "$domain"_js_endpoints.txt "$current"/"$domain"/"$subdirectory"/fuzzing/
-   cat "$domain"_js_endpoints.txt
-   rm "$domain"_js_endpoints.txt "$domain"_unique.txt
+   mv "$domain"_js_endpoints.txt "$current"/"$domain"/"$subdirectory"/URLs/
+#   cat "$domain"_js_endpoints.txt
+   rm "$domain"_unique.txt
  #  filefuzz
    wayback
 }
@@ -156,17 +213,16 @@ linkfinder()
 #}
 
 
-#crlf()
-#{
- #  cd "$current"
-  # echo "*************************************************************************************************"
-   #echo -e "\e[92m[~] Scanning for CRLF injection.."
-   #echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
-   #echo "*************************************************************************************************"
-   #cp "$domain"_unique.txt /root/scripts/bounty/CRLF-Injection-Scanner/
-   #cd /root/scripts/bounty/CRLF-Injection-Scanner/
-   #python crlf_scan.py -i "$domain"_unique.txt -o "$domain"_crlf.txt
-   #echo "*************************************************************************************************"
+crlf()
+{
+   cd "$current"/"$domain"/"$subdirectory"/subdomain/
+   echo "*************************************************************************************************"
+   echo -e "\e[92m[~] Scanning for CRLF injection.."
+   echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
+   echo "*************************************************************************************************"
+   mkdir ../vulns/"$domain"_crlf
+   interlace -tL subjack_input.txt -threads 20 -c "crlf scan -u _target_ > _output_/_target_.txt" -v -o "$domain"_crlf
+   echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
 	#cat "$domain"_crlf.txt
@@ -178,7 +234,7 @@ linkfinder()
 #	echo "********************************************************************************************"
  #  fi
   # rm "$domain"_unique.txt
-   #cors
+   linkfinder
 #}
 
 
@@ -186,8 +242,8 @@ s3scan()
 {
    bucket=`echo "$domain" | cut -d "." -f 1`
    echo "**************************************************************************************************"
-   echo -e "\e[92m[~] Scanning for s3 bucket.."
-   echo -e "\e[92m[~] S3Scanner will be in action.."
+   #echo -e "\e[92m[~] Scanning for s3 bucket.."
+   #echo -e "\e[92m[~] S3Scanner will be in action.."
    echo "**************************************************************************************************"
    cd "$current"
 #   cp "$domain"_unique.txt /root/scripts/bounty/S3Scanner/
@@ -210,10 +266,11 @@ s3scan()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] Cloud_enum will start.."
    cd /root/scripts/bounty/cloud_enum/
-   ./cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
-   cat "$domain"_s3_bucket.txt | grep "OPEN S3 BUCKET:"
-   cp "$domain"_s3_bucket.txt "$current"/"$domain"/"$subdirectory"/subdomains/
-   rm "$domain"_s3_bucket.txt
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
+   cp "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt "$current"/"$domain"/"$subdirectory"/buckets/
+   rm "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt
    echo "***************************************************************************************"
 #   echo -e "\e[92m[~] Gogetbucket will start.."
    echo "***************************************************************************************"
@@ -224,27 +281,29 @@ s3scan()
   # cp "$domain"_bucket.txt /"$current"/"$domain"/"$subdirectory"/subdomains/
   # cat "$domain"_bucket.txt | grep true
   # rm "$domain"_bucket.txt
-   echo "***************************************************************************************"
-   echo -e "\e[92m[~] Bucket finder will start.."
-   echo "***************************************************************************************"
-   cd "$current"
-   cp "$domain"_unique.txt ../bucket_finder/
-   cd /root/scripts/bounty/bucket_finder/
-   ./bucket_finder.rb -v "$domain"_unique.txt -l bucket_finder_op.txt
-   cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
-   rm bucket_finder_op.txt "$domain"_unique.txt
-   linkfinder
+  # echo "***************************************************************************************"
+  # echo -e "\e[92m[~] Bucket finder will start.."
+  # echo "***************************************************************************************"
+  # cd "$current"
+  # cp "$domain"_unique.txt ../bucket_finder/
+  # cd /root/scripts/bounty/bucket_finder/
+  # ./bucket_finder.rb -v "$domain"_unique.txt -l bucket_finder_op.txt
+  #cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
+  # rm bucket_finder_op.txt "$domain"_unique.txt
+   crlf
 
 }
 
 
-#dirbruteforce()
-#{
- #  cd "$current"
-  # echo "***************************************************************************************************"
-   #echo -e "\e[92m[~] Dirbruteforce will start.."
-   #echo -e "\e[92m[~] Gobuster will be in action.."
-   #echo "***************************************************************************************************"
+dirbruteforce()
+{
+   cd "$current"
+   echo "***************************************************************************************************"
+   echo -e "\e[92m[~] Dirbruteforce will start.."
+   echo -e "\e[92m[~] FFUF will be in action.."
+   echo "***************************************************************************************************"
+   cd ./"$domain"/"$subdirectory"/subdomain/
+   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w /root/wordlists/dicc.txt:FUZZ -mode clusterbomb
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
    #do
@@ -259,7 +318,7 @@ s3scan()
    #cat "$domain"_gobuster.txt | grep "(Status: 200)"
   # cp "$domain"_gobuster.txt ./"$domain"/"$subdirectory"/fuzzing/
    #rm "$domain"_gobuster.txt
-   #s3scan
+   s3scan
 #}
 
 
@@ -291,17 +350,20 @@ s3scan()
 portscan()
 {
    echo "********************************************************************************"
-   echo -e "\e[92m[~] Masscan will start in some time.."
+   echo -e "\e[92m[~] naabu will start in some time.."
    sleep 3
-   iptables -A INPUT -p tcp --dport 61000 -j DROP    #some problem with masscan
-   masscan -iL "$domain"_sorted_ip.txt -p0-65535 --rate 100000 --banners --source-port 61000 -v -oG "$domain"_masscan.txt
-   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
-   rm "$domain"_masscan.txt
-   echo -e "\e[31m[~] Masscan completed.."
+#   iptables -A INPUT -p tcp --dport 61000 -j DROP    #some problem with masscan
+#   masscan -iL "$domain"_sorted_ip.txt -p0-65535 --rate 100000 --banners --source-port 61000 -v -oG "$domain"_masscan.txt
+#   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
+#   rm "$domain"_masscan.txt
+   cd /"$current"/"$domain"/"$subdirectory"/subdomains/
+   naabu -hL subjack_input.txt -t 20 -verify -retries 4 -timeout 1000 -ports full -silent -o ../portscan/naabu_output.txt
+   echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
    echo "********************************************************************************"
-   sleep 3
+   sleep 2
+   cat ../portscan/naabu_output.txt | bash nmap.sh >> ../portscan/nmap_result.txt
 #   touch "$domain"_banner.txt
 #   for ip in `cat "$domain"_sorted_ip.txt`
 #   do
@@ -309,88 +371,79 @@ portscan()
 #	echo "**************************************************************************************************" >> "$domain"_banner.txt
 #	cat "$domain"_banner.txt
 #   done
-#   echo -e "\e[92m[~] NSE banner grabbing completed.."
+   echo -e "\e[92m[~] NMAP service detection completed.."
    echo "**********************************************************************************"
-   cd /root/scripts/bounty/Myrecon/
-#   cp "$domain"_banner.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
-#   rm "$domain"_banner.txt
-   cp "$domain"_sorted_ip.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
-   rm "$domain"_sorted_ip.txt
-   s3scan
+   dirbruteforce
 }
 
 
-ipresolve()
-{
-   cd "$current"
-   echo "***********************************************************************************"
-   echo -e "\e[92m[~] Now resolving ip for port scanning"
-   sleep 3
-   touch "$domain"_ip.txt
-   cp "$domain"_unique.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/fuzzing/
-   for ip in `cat "$domain"_unique.txt`
-   do
-	host "$ip" | cut -d " " -f 4 | sed 's/alias//g' | sed 's/CNAME//g' | sed 's/address//g' | sed 's/found://g' | sed 's/out;//g' | sed 's/handled//g' | sed '/^$/d' >> "$domain"_ip.txt
-	cat "$domain"_ip.txt
-   done
-   echo "***********************************************************************************"
-   echo -e "\e[92m[~] Sorting file for unqiue ip"
-   cp "$current"/"$domain"/"$subdirectory"/subdomains/knock_ip.txt "$current"
-   cp "$current"/"$domain"/"$subdirectory"/subdomains/massdns_ip.txt "$current"
-   cat knock_ip.txt >> "$domain"_ip.txt
-   cat massdns_ip.txt >> "$domain"_ip.txt
-   cat "$domain"_ip.txt | sort -u > "$domain"_sorted_ip.txt
-   cp "$domain"_sorted_ip.txt ./"$domain"/"$subdirectory"/subdomains/
-   rm "$domain"_ip.txt knock_ip.txt massdns_ip.txt 
-   echo -e "\e[92m[~] File sorted successfully and passing to port scanning"
-   echo "***********************************************************************************"
-   sleep 3
-}
+#ipresolve()
+#{
+ #  cd "$current"
+#   echo "***********************************************************************************"
+ #  echo -e "\e[92m[~] Now resolving ip for port scanning"
+  # sleep 1
+  # touch "$domain"_ip.txt
+  # cp "$domain"_unique.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/fuzzing/
+  # for ip in `cat "$domain"_unique.txt`
+  # do
+#	host "$ip" | cut -d " " -f 4 | sed 's/alias//g' | sed 's/CNAME//g' | sed 's/address//g' | sed 's/found://g' | sed 's/out;//g' | sed 's/handled//g' | sed '/^$/d' >> "$domain"_ip.txt
+#	cat "$domain"_ip.txt
+ #  done
+  # echo "***********************************************************************************"
+  # echo -e "\e[92m[~] Sorting file for unqiue ip"
+  # cp "$current"/"$domain"/"$subdirectory"/subdomains/knock_ip.txt "$current"
+  # cp "$current"/"$domain"/"$subdirectory"/subdomains/massdns_ip.txt "$current"
+  # cat knock_ip.txt >> "$domain"_ip.txt
+  # cat massdns_ip.txt >> "$domain"_ip.txt
+  # cat "$domain"_ip.txt | sort -u > "$domain"_sorted_ip.txt
+  # cp "$domain"_sorted_ip.txt ./"$domain"/"$subdirectory"/subdomains/
+  # rm "$domain"_ip.txt knock_ip.txt massdns_ip.txt 
+  # echo -e "\e[92m[~] File sorted successfully and passing to port scanning"
+  # echo "***********************************************************************************"
+  # sleep 3
+#}
 
 
 subdomain()
 {
    echo ""
-   echo -e "\e[31m[~] Sublist3r will start in 2 seconds.."
-   sleep 2
+   echo -e "\e[31m[~] assetfinder will start in a second.."
+   sleep 1
    clear
-   python3 /root/scripts/bounty/Sublist3r/sublist3r.py -d "$domain" -t 50 -o ./"$domain"/"$subdirectory"/subdomains/sublist3r.txt -v
+   cd ./"$domain"/"$subdirectory"/subdomains/
+   assetfinder -subs-only "$domain" | tee assetfinder_result.txt
    echo ""
-   echo -e "\e[92m[~] Sublist3r scan completed.."
+   echo -e "\e[92m[~] assetfinder scan completed.."
    echo "*****************************************************************************************"
-   echo -e "\e[93m[~] Amass scan will start in 2 seconds"
-   sleep 2
+   echo -e "\e[93m[~] Amass scan will start in a second.."
+   sleep 1
    echo -e "\e[31m[~] Amass scan started"
    echo "*****************************************************************************************"
-   amass enum -passive -d "$domain" -o ./"$domain"/"$subdirectory"/subdomains/amass_result.txt
+   amass enum -passive -d "$domain" -o amass_result.txt
    echo -e "\e[92m[~] Amass scan completed"
    echo "*****************************************************************************************"
    echo -e "\e[92m[~] File saved as amass_result.txt"
    echo "*****************************************************************************************"
-   echo -e "\e[93m[~] findomain and subfinder in work.. scan will start in 3 seconds.."
-   sleep 3
-   subfinder -d "$domain" -t 30 -o ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt
+   echo -e "\e[93m[~] findomain and subfinder in work.. scan will start in a second.."
+   sleep 1
+   subfinder -d "$domain" -t 30 -o subfinder_result.txt
    findomain -t "$domain" -o
-   cp "$domain".txt ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt
+   cp "$domain".txt findomain_result.txt
    rm "$domain".txt
    echo -e "\e[92m[~] findomain scan completed"
-   echo -e "\e[92m[~] File saved as $domain.txt"
+   echo -e "\e[93m[~] finding subdomains from github.."
+   cd /root/scripts/bounty/
+   python3 github-subdomains.py -t "3eaa91453b38ef456900f31f91cb4024d65dc5fb" -d "$domain" | tee -a "$current"/"$domain"/"$subdirectory"/subdomains/github_domains.txt
    echo "*****************************************************************************************"
-   echo -e "\e[93m[~] Knock will start scanning in 5 seconds"
-   sleep 5
-   knockpy -c "$domain"
-   echo -e "\e[92m[~] Filtering the output..."
-   cat *.csv | cut -d "," -f 4 > ./"$domain"/"$subdirectory"/subdomains/knock_domains.txt  #taking only domain name
-   cat *.csv | cut -d "," -f 1 > ./"$domain"/"$subdirectory"/subdomains/knock_ip.txt   #taking only ip's
-   echo -e "\e[92m[~] Knock scan completed..."
-   echo -e "\e[92m[~] File saved as knock_domains"
    echo "*****************************************************************************************"
-   echo -e "\e[92m[~] Compiling unique results for massdns to scan"
-   cat ./"$domain"/"$subdirectory"/subdomains/sublist3r.txt > ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
+   echo -e "\e[92m[~] Compiling unique results to scan"
+   cd "$current"
+   cat ./"$domain"/"$subdirectory"/subdomains/assetfinder_result.txt > ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/amass_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
-   cat ./"$domain"/"$subdirectory"/subdomains/knock_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
+   cat ./"$domain"/"$subdirectory"/subdomains/github_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
    if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
    then
@@ -400,8 +453,8 @@ subdomain()
 	exit 1
    fi
    echo "*****************************************************************************************"
-   sleep 5
-   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
+   sleep 2
+#   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
 #   echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
    echo "*****************************************************************************************"
 #   $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt "$domain"_unique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
@@ -417,7 +470,6 @@ subdomain()
  #  rm *.csv
   # echo -e "\e[92m[~] Massdns and altdns scan completed file saved.."
   # echo "*****************************************************************************************"
-   rm -rf amass_output altdns.txt
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_mix.txt "$current"
    echo "*****************************************************************************************"
    echo -e "\e[92m[~] Checking whether host is alive or not.."
@@ -430,68 +482,62 @@ subdomain()
  #  			sed -i "/${host}/d" "$domain"_unique.txt
 #	fi
  #  done
-   echo -e "\e[92m[~] Recce will be in action.."
+   echo -e "\e[92m[~] httprobe will be in action.."
    cd "$current"
-   cp "$domain"_Bunique.txt ../recce/
-   cd /root/scripts/bounty/recce/
-   python3 recce.py -f "$domain"_Bunique.txt -t 20 -o "$domain"_unique.txt
-   cp "$domain"_unique.txt "$current"
+   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ../probing/
+   cd ./"$domain"/"$subdirectory"/probing/
+   cat"$domain"_Bunique.txt | httprobe -c 150 | tee "$domain"_unique.txt
+#   cp "$domain"_unique.txt "$current"
    echo -e "\e[92m[~] All Host checked.."
-   echo -e "\e[92m[~] Total online.."
-   cat "$domain"_unique.txt | wc -l
+ #  echo -e "\e[92m[~] Total online.."
+#   cat "$domain"_unique.txt | wc -l
    echo "******************************************************************************************"
-   cp "$domain"_unique.txt "$current"/"$domain"/"$subdirectory"/subdomains/
+#   cp "$domain"_unique.txt "$current"/"$domain"/"$subdirectory"/probing/
    echo "******************************************************************************************"
-   rm "$domain"_unique.txt "$domain"_Bunique.txt
+#   rm "$domain"_unique.txt "$domain"_Bunique.txt
    cd "$current"/"$domain"/"$subdirectory"/subdomains
-   cp "$domain"_unique.txt aquatone/
-   rm -rf amass_output sublist3r.txt amass_result.txt findomain_result.txt knock_domain.txt massdns.txt massdns_domain.txt altdns.txt massdns_altdns.txt subfinder_result.txt
-   cd aquatone/
+#   cp "$domain"_unique.txt aquatone/
+#   cd aquatone/
    echo -e "\e[92m[~] Passing file to aquatone"
    echo "*****************************************************************************************"
-   sleep 3
-   sed -i 's/^/https:\/\//' "$domain"_unique.txt
-   cat "$domain"_unique.txt | aquatone -debug
-   rm -rf "$domain"_unique.txt headers html aquatone_urls.txt
-   cd "$current"
+   sleep 1
+#   sed -i 's/^/https:\/\//' "$domain"_unique.txt
+   cat "$domain"_unique.txt | aquatone -ports xlarge -threads 20 -http-timeout 30000 -screenshot-timeout 90000 -out ../screenshot/aquatone/
+#   rm -rf "$domain"_unique.txt headers html aquatone_urls.txt
+#   cd "$current"
    echo "*****************************************************************************************"
-   echo -e "\e[92m[~] Script Now scan for subdomain takeover"
+   echo -e "\e[92m[~] Script will now scan for subdomain takeover"
    echo "*****************************************************************************************"
-   sleep 2
-   cp "$domain"_unique.txt /root/go/src/github.com/haccer/subjack/
-   cd /root/go/src/github.com/haccer/subjack
-   echo -e "\e[92m[~] Directory changed.."
+ #  sleep 2
+#   cp "$domain"_unique.txt /root/go/src/github.com/haccer/subjack/
+#   cd /root/go/src/github.com/haccer/subjack
+#   echo -e "\e[92m[~] Directory changed.."
    echo -e "\e[92m[~] Subjack is in action.."
    echo "*****************************************************************************************"
+   sed -e 's/https:\/\///g; s/http:\/\///g' "$domain"_unique.txt | sort -u >> subjack_input.txt
    sleep 2
-   ./main -c fingerprints.json -t 50 -timeout 20 -v -w "$domain"_unique.txt -o subjack_result.txt
-   cp subjack_result.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
-   rm subjack_result.txt "$domain"_unique.txt
+   subjack -m -t 50 -timeout 20 -v -w subjack_input.txt -o ../subdomains/subjack_result.txt
    echo -e "\e[92m[~] subjack completed his task.."
    echo "*****************************************************************************************"
-   cd -
-   cp "$domain"_unique.txt /root/go/src/github.com/Ice3man543/SubOver/
-   cd /root/go/src/github.com/Ice3man543/SubOver/
-   echo -e "\e[92m[~] Directory changed..."
+#   cd -
    echo -e "\e[92m[~] Subover is in action..."
    sleep 2
-   ./subover -l "$domain"_unique.txt -t 100 -timeout 30 -v -o "$domain"_subover.txt
-   cp "$domain"_subover.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
-   rm "$domain"_subover.txt "$domain"_unique.txt
+   subover -l subjack_input.txt -t 100 -timeout 30 -v -o ../subdomains/"$domain"_subover.txt
+   cp subjack_input.txt ../buckets/
    echo -e "\e[92m[~] subover completed his task.."
    echo "*****************************************************************************************"
-   cd "$current"
-   cp "$domain"_unique.txt /root/go/src/github.com/anshumanbh/tko-subs/
+#   cd "$current"
+   cp subjack_input.txt /root/go/src/github.com/anshumanbh/tko-subs/
    cd /root/go/src/github.com/anshumanbh/tko-subs/
    echo "*****************************************************************************************"
    echo -e "\e[92m[~] Directory changed.."
    echo -e "\e[92m[~] tko-subs is in action.."
    echo "*****************************************************************************************"
    sleep 1
-   ./tko-subs -domains "$domain"_unique.txt -data providers-data.csv -threads 100
+   ./tko-subs -domains subjack_input.txt -data providers-data.csv -threads 100
    echo "*****************************************************************************************"
-   cp output.csv /"$current"/"$domain"/"$subdirectory"/fuzzing/"$domain"_tko-subs.csv
-   cd /"$current"/"$domain"/"$subdirectory"/fuzzing/
+   mv output.csv /"$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_tko-subs.csv
+   cd "$current"
    count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
    if [ "$count" == 1 ]
    then
@@ -502,6 +548,7 @@ subdomain()
 	cat "$domain"_tko-subs.csv
 	echo "************************************************************************************"
    fi
+portscan
 }
 
 helpFunction()
@@ -522,15 +569,20 @@ do
    esac
 done
 
-if [ -d "./$domain" ]
+if [ -d "/root/recon/$domain" ]
 then
    echo -e "\e[91m[~] Target already scanned"
 else
    mkdir ./"$domain"
    mkdir ./"$domain"/"$subdirectory"
    mkdir ./"$domain"/"$subdirectory"/subdomains
-   mkdir ./"$domain"/"$subdirectory"/subdomains/aquatone
-   mkdir ./"$domain"/"$subdirectory"/fuzzing/
+   mkdir ./"$domain"/"$subdirectory"/directory
+   mkdir ./"$domain"/"$subdirectory"/probing
+   mkdir ./"$domain"/"$subdirectory"/screenshot
+   mkdir ./"$domain"/"$subdirectory"/buckets
+   mkdir ./"$domain"/"$subdirectory"/URLs
+   mkdir ./"$domain"/"$subdirectory"/portscan
+   mkdir ./"$domain"/"$subdirectory"/vulns
 fi
 
 if [ -z "$domain" ]
@@ -539,6 +591,4 @@ then
    helpFunction
 else
    subdomain
-   ipresolve
-   portscan
 fi
