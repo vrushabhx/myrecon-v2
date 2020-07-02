@@ -51,12 +51,12 @@ current=`pwd`
 #}
 vulnscan()
 {
-  cd "$current"/"$domain"/"$subdirectory"/subdomain/
+  cd "$current"/"$domain"/"$subdirectory"/subdomains/
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  nuclei -c 200 -l 15.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
   cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cat spider_clean_1.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -73,19 +73,19 @@ vulnscan()
   cp ../subdomain/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
   python3 arjun.py --urls "$domain"_unique.txt --get -t 100 -o arjun_result.json
-  mv arjun_result.json "$current"/"$domain"/"$subdirectory"/vulns/
+  mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
   ss=http://ssrftest.com/x/kVTj1
   cd "$current"/"$domain"/"$subdirectory"/URLs/
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
   cat ../vulns/possible_ssrf.txt | sed 's|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g' | tee -a ../vulns/possible_ssrf_2.txt
   ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100
 #IDOR
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
 #SSTI
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf ssti | tee -a ../vulns/possible_ssti.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssti | tee -a ../vulns/possible_ssti.txt
   cd ../vulns/
   for line in `cat possible_ssti.txt`;
   do
@@ -93,13 +93,13 @@ vulnscan()
   done
   cd ../URLs/
 #open-redirect
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
 #LFI
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf lfi | tee -a ../vulns/possible_lfi.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf lfi | tee -a ../vulns/possible_lfi.txt
 #RCE
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf rce | tee -a ../vulns/possible_rce.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf rce | tee -a ../vulns/possible_rce.txt
 #SQLi
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | cgrep | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
   cd ../vulns/
   mkdir sql_result
   a=50
@@ -122,18 +122,18 @@ vulnscan()
 spider()
 {
 # Crawl all subdomains and filter the result
-   cd "$current"/"$domain"/"$subdirectory"/subdomain/
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
    gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r -a
    cd ../URLs/crawl_data/
    cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a spider_clean_1.txt
    cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a spider_clean_2.txt
    cd ../
-   vulns
+   vulnscan
 }
 
 wayback()
 {
-   cd "$current"/"$domain"/"$subdirectory"/subdomain
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
    echo "***********************************************************************************************"
    echo -e "\e[92m[~] Going back in time to search some endpoints.."
    echo -e "\e[92m[~] Waybackurl will be in action.."
@@ -215,7 +215,7 @@ linkfinder()
 
 crlf()
 {
-   cd "$current"/"$domain"/"$subdirectory"/subdomain/
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
    echo "*************************************************************************************************"
    echo -e "\e[92m[~] Scanning for CRLF injection.."
    echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
@@ -300,7 +300,7 @@ dirbruteforce()
    echo -e "\e[92m[~] Dirbruteforce will start.."
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
-   cd ./"$domain"/"$subdirectory"/subdomain/
+   cd ./"$domain"/"$subdirectory"/subdomains/
    ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w /root/wordlists/dicc.txt:FUZZ -mode clusterbomb
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
@@ -452,7 +452,7 @@ subdomain()
    sleep 2
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
 #   echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
-   echo "*****************************************************************************************"
+#   echo "*****************************************************************************************"
 #   $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt "$domain"_unique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
 #   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 3 > ./"$domain"/"$subdirectory"/subdomains/massdns_ip.txt
  #  cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 > ./"$domain"/"$subdirectory"/subdomains/massdns_domain.txt
@@ -480,9 +480,9 @@ subdomain()
  #  done
    echo -e "\e[92m[~] httprobe will be in action.."
    cd "$current"
-   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ../probing/
+   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ./"$domain"/"$subdirectory"/probing/
    cd ./"$domain"/"$subdirectory"/probing/
-   cat"$domain"_Bunique.txt | httprobe -c 150 | tee "$domain"_unique.txt
+   cat "$domain"_Bunique.txt | httprobe -c 150 | tee "$domain"_unique.txt
 #   cp "$domain"_unique.txt "$current"
    echo -e "\e[92m[~] All Host checked.."
  #  echo -e "\e[92m[~] Total online.."
@@ -518,11 +518,12 @@ subdomain()
 #   cd -
    echo -e "\e[92m[~] Subover is in action..."
    sleep 2
-   subover -l subjack_input.txt -t 100 -timeout 30 -v -o ../subdomains/"$domain"_subover.txt
-   cp subjack_input.txt ../buckets/
+   cd /root/go/src/github.com/Ice3man543/SubOver/
+   ./subover -l "$current"/"$domain"/"$subdirectory"/subdomains/subjack_input.txt -t 100 -timeout 30 -v -o "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_subover.txt
+#   cp subjack_input.txt ../buckets/
    echo -e "\e[92m[~] subover completed his task.."
    echo "*****************************************************************************************"
-#   cd "$current"
+   cd -
    cp subjack_input.txt /root/go/src/github.com/anshumanbh/tko-subs/
    cd /root/go/src/github.com/anshumanbh/tko-subs/
    echo "*****************************************************************************************"
@@ -532,7 +533,7 @@ subdomain()
    sleep 1
    ./tko-subs -domains subjack_input.txt -data providers-data.csv -threads 100
    echo "*****************************************************************************************"
-   mv output.csv /"$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_tko-subs.csv
+   mv output.csv "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_tko-subs.csv
    cd "$current"
    count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
    if [ "$count" == 1 ]
