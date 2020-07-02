@@ -221,7 +221,7 @@ crlf()
    echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
    echo "*************************************************************************************************"
    mkdir ../vulns/"$domain"_crlf
-   interlace -tL subjack_input.txt -threads 20 -c "crlf scan -u _target_ > _output_/_target_.txt" -v -o "$domain"_crlf
+   interlace -tL subjack_input.txt -threads 20 -c "crlf scan -u _target_ > _output_/_target_.txt" -v -o ../vulns/"$domain"_crlf
    echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
@@ -235,7 +235,7 @@ crlf()
  #  fi
   # rm "$domain"_unique.txt
    linkfinder
-#}
+}
 
 
 s3scan()
@@ -291,7 +291,6 @@ s3scan()
   #cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
   # rm bucket_finder_op.txt "$domain"_unique.txt
    crlf
-
 }
 
 
@@ -346,7 +345,6 @@ dirbruteforce()
    #dirbruteforce
 #}
 
-echo "$current"
 portscan()
 {
    echo "********************************************************************************"
