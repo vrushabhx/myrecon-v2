@@ -319,7 +319,7 @@ dirbruteforce()
   # cp "$domain"_gobuster.txt ./"$domain"/"$subdirectory"/fuzzing/
    #rm "$domain"_gobuster.txt
    s3scan
-#}
+}
 
 
 #vhostscan()
@@ -346,7 +346,7 @@ dirbruteforce()
    #dirbruteforce
 #}
 
-
+echo "$current"
 portscan()
 {
    echo "********************************************************************************"
@@ -403,7 +403,6 @@ portscan()
   # echo "***********************************************************************************"
   # sleep 3
 #}
-
 
 subdomain()
 {
@@ -544,11 +543,11 @@ subdomain()
 	echo -e "\e[31m[~] No takeovers found.."
 	echo "************************************************************************************"
    else
-	echo -e "\e[92m[~] Takeovers found check manually.."
+	echo -e "\e[92m[~] Possible Takeovers found check manually.."
 	cat "$domain"_tko-subs.csv
 	echo "************************************************************************************"
    fi
-portscan
+   portscan
 }
 
 helpFunction()
@@ -569,7 +568,7 @@ do
    esac
 done
 
-if [ -d "/root/recon/$domain" ]
+if [ -d "./$domain" ]
 then
    echo -e "\e[91m[~] Target already scanned"
 else
