@@ -34,4 +34,4 @@ ports=`cat $PORTSFILE | tr '\n' ','`
 echo "Running nmap service scan on found results."
 echo "Executing nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV"
 
-nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV
+cat "$TARGETSFILE" | interlace -c "nmap _target_ -p ${ports:0:-1} -sV" -threads 20 -v | tee -a ../portscan/nmap_result.txt

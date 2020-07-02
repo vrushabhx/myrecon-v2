@@ -220,8 +220,7 @@ crlf()
    echo -e "\e[92m[~] Scanning for CRLF injection.."
    echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
    echo "*************************************************************************************************"
-   mkdir ../vulns/"$domain"_crlf
-   interlace -tL subjack_input.txt -threads 20 -c "crlf scan -u _target_ > _output_/_target_.txt" -v -o ../vulns/"$domain"_crlf
+   cat subjack_input.txt | interlace -threads 20 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
    echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
@@ -361,7 +360,7 @@ portscan()
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
    echo "********************************************************************************"
    sleep 2
-   cat ../portscan/naabu_output.txt | bash nmap.sh >> ../portscan/nmap_result.txt
+   cat ../portscan/naabu_output.txt | bash "$current"/nmap.sh
 #   touch "$domain"_banner.txt
 #   for ip in `cat "$domain"_sorted_ip.txt`
 #   do
