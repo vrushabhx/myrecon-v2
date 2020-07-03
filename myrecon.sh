@@ -1,5 +1,5 @@
 #!/bin/bash
-clear
+#clear
 banner=`figlet -f slant myrecon`    #without banner there is no script
 echo -e "\e[93;1m${banner}" 
 echo -e "			\e[31;1m A script by Shubham Chaskar"
@@ -58,6 +58,7 @@ vulnscan()
 #Nuclei Scanner
   nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
+  cd ../URLs/
   cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cat spider_clean_1.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cat spider_clean_2.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -125,10 +126,17 @@ spider()
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
    gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r -a
    cd ../URLs/crawl_data/
-   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a spider_clean_1.txt
-   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a spider_clean_2.txt
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a ../spider_clean_1.txt
+   cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a ../spider_clean_2.txt
    cd ../
-   vulnscan
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	vulnscan
+   fi
 }
 
 wayback()
@@ -138,15 +146,22 @@ wayback()
    echo -e "\e[92m[~] Going back in time to search some endpoints.."
    echo -e "\e[92m[~] Waybackurl will be in action.."
    echo "***********************************************************************************************"
-   cat "$domain"_unique.txt | waybackurls -no-subs | tee -a ../URLs/wayback.txt
+   cat subjack_input.txt | waybackurls -no-subs | tee -a ../URLs/wayback.txt
    echo "***********************************************************************************************"
    echo -e "\e[92m[~] Getallurls will be in action.."
    echo "***********************************************************************************************"
-   cat "$domain"_unique.txt | gau | tee -a ../URLs/gau.txt
+   cat subjack_input.txt | gau | tee -a ../URLs/gau.txt
    cd ../URLs/
    cat wayback.txt gau.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | qsreplace -a | tee -a clean_url.txt
-   spider
- #  screenshot
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	spider
+   fi
+
 }
 
 
@@ -174,7 +189,14 @@ linkfinder()
 #   cat "$domain"_js_endpoints.txt
    rm "$domain"_unique.txt
  #  filefuzz
-   wayback
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	wayback
+   fi
 }
 
 
@@ -233,7 +255,14 @@ crlf()
 #	echo "********************************************************************************************"
  #  fi
   # rm "$domain"_unique.txt
-   linkfinder
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	linkfinder
+   fi
 }
 
 
@@ -289,7 +318,14 @@ s3scan()
   # ./bucket_finder.rb -v "$domain"_unique.txt -l bucket_finder_op.txt
   #cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
   # rm bucket_finder_op.txt "$domain"_unique.txt
-   crlf
+  if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	crlf
+   fi
 }
 
 
@@ -316,8 +352,17 @@ dirbruteforce()
    #cat "$domain"_gobuster.txt | grep "(Status: 200)"
   # cp "$domain"_gobuster.txt ./"$domain"/"$subdirectory"/fuzzing/
    #rm "$domain"_gobuster.txt
-   s3scan
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	s3scan
+   fi
+
 }
+
 
 
 #vhostscan()
@@ -370,7 +415,16 @@ portscan()
 #   done
    echo -e "\e[92m[~] NMAP service detection completed.."
    echo "**********************************************************************************"
-   dirbruteforce
+   mv naabu_output_ports.txt ../portscan/
+   mv naabu_output_targets.txt ../portscan/
+   if [ -z "$module" ]
+   then
+        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   else
+	dirbruteforce
+   fi
 }
 
 
@@ -534,7 +588,7 @@ subdomain()
    ./tko-subs -domains subjack_input.txt -data providers-data.csv -threads 100
    echo "*****************************************************************************************"
    mv output.csv "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_tko-subs.csv
-   cd "$current"
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
    count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
    if [ "$count" == 1 ]
    then
@@ -545,7 +599,14 @@ subdomain()
 	cat "$domain"_tko-subs.csv
 	echo "************************************************************************************"
    fi
-   portscan
+   if [ -z "$module" ]
+   then
+	portscan
+   else
+	echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   fi
 }
 
 helpFunction()
@@ -556,20 +617,19 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-subdirectory=recon-$(date +"%Y-%m-%d")
+subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:" opt
+while getopts "d:h:m:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
+      m	) module="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 if [ -d "./$domain" ]
 then
-   echo -e "\e[91m[~] Target already scanned"
-else
    mkdir ./"$domain"
    mkdir ./"$domain"/"$subdirectory"
    mkdir ./"$domain"/"$subdirectory"/subdomains
@@ -581,11 +641,10 @@ else
    mkdir ./"$domain"/"$subdirectory"/portscan
    mkdir ./"$domain"/"$subdirectory"/vulns
 fi
-
-if [ -z "$domain" ]
+clear
+if [ -z "$module" ]
 then
-   echo -e "\e[91m[~] Pass the domain name";
-   helpFunction
+	subdomain
 else
-   subdomain
+	"$module"
 fi
