@@ -555,7 +555,8 @@ subdomain()
    echo "*****************************************************************************************"
    sleep 1
 #   sed -i 's/^/https:\/\//' "$domain"_unique.txt
-   cat "$domain"_unique.txt | aquatone -ports xlarge -threads 20 -http-timeout 30000 -screenshot-timeout 90000 -out ../screenshot/aquatone/
+   cat "$domain"_unique.txt | aquatone -ports xlarge -threads 20 -http-timeout 30000 -screenshot-timeout 90000 -out aquatone_result
+   mv aquatone_result ../screenshot/
 #   rm -rf "$domain"_unique.txt headers html aquatone_urls.txt
 #   cd "$current"
    echo "*****************************************************************************************"
