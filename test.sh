@@ -39,15 +39,20 @@ else
 	echo "Two"
 fi
 
-
-for host1 in `cat seek.com.au_unique1.txt`
-do
-	if [ $(curl -I "$host1" --write-out %{http_code} -m 3 --silent --output /dev/null) == 000 ]
-		then
-			echo "unreachable"
-			echo "Deleting $host1 from file"
-			sed -i "/${host1}/d" seek.com.au_unique.txt
-	else
-		echo "Reachable"
-	fi
-done
+if ! command -v findomains &> /dev/null
+then
+	echo "not exist"
+else
+	echo "yes"
+fi
+#for host1 in `cat seek.com.au_unique1.txt`
+#do
+#	if [ $(curl -I "$host1" --write-out %{http_code} -m 3 --silent --output /dev/null) == 000 ]
+#		then
+#			echo "unreachable"
+#			echo "Deleting $host1 from file"
+#			sed -i "/${host1}/d" seek.com.au_unique.txt
+#	else
+#		echo "Reachable"
+#	fi
+#done

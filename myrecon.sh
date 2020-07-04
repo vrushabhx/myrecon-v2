@@ -78,7 +78,7 @@ vulnscan()
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
-  ss="put your ssrf server without quotes"            #ssrftest.com or ngrok or burp private collaborator
+  ss=put your ssrf server without quotes            #ssrftest.com or ngrok or burp private collaborator
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
   cat ../vulns/possible_ssrf.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_2.txt
@@ -298,9 +298,9 @@ s3scan()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] Cloud_enum will start.."
    cd /root/scripts/bounty/cloud_enum/
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
    cp "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt "$current"/"$domain"/"$subdirectory"/buckets/
    rm "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt
    echo "***************************************************************************************"
@@ -341,7 +341,7 @@ dirbruteforce()
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
-   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w /root/wordlists/dicc.txt:FUZZ -mode clusterbomb
+   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w /root/wordlists/your-wordlist:FUZZ -mode clusterbomb
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
    #do
@@ -487,7 +487,7 @@ subdomain()
    rm "$domain".txt
    echo -e "\e[92m[~] findomain scan completed"
    echo -e "\e[93m[~] finding subdomains from github.."
-   cd /root/scripts/bounty/
+   cd /root/scripts/bounty/github-search/
    python3 github-subdomains.py -t "3eaa91453b38ef456900f31f91cb4024d65dc5fb" -d "$domain" | tee -a "$current"/"$domain"/"$subdirectory"/subdomains/github_domains.txt
    echo "*****************************************************************************************"
    echo "*****************************************************************************************"
