@@ -461,6 +461,7 @@ portscan()
 
 subdomain()
 {
+   cd "$current"
    echo ""
    echo -e "\e[31m[~] assetfinder will start in a second.."
    sleep 1
