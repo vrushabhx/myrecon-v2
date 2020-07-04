@@ -633,19 +633,17 @@ do
    esac
 done
 
-if [ -d "./$domain" ]
-then
-   mkdir ./"$domain"
-   mkdir ./"$domain"/"$subdirectory"
-   mkdir ./"$domain"/"$subdirectory"/subdomains
-   mkdir ./"$domain"/"$subdirectory"/directory
-   mkdir ./"$domain"/"$subdirectory"/probing
-   mkdir ./"$domain"/"$subdirectory"/screenshot
-   mkdir ./"$domain"/"$subdirectory"/buckets
-   mkdir ./"$domain"/"$subdirectory"/URLs
-   mkdir ./"$domain"/"$subdirectory"/portscan
-   mkdir ./"$domain"/"$subdirectory"/vulns
-fi
+mkdir ./"$domain"
+mkdir ./"$domain"/"$subdirectory"
+mkdir ./"$domain"/"$subdirectory"/subdomains
+mkdir ./"$domain"/"$subdirectory"/directory
+mkdir ./"$domain"/"$subdirectory"/probing
+mkdir ./"$domain"/"$subdirectory"/screenshot
+mkdir ./"$domain"/"$subdirectory"/buckets
+mkdir ./"$domain"/"$subdirectory"/URLs
+mkdir ./"$domain"/"$subdirectory"/portscan
+mkdir ./"$domain"/"$subdirectory"/vulns
+
 clear
 if [ -z "$module" ]
 then
