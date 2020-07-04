@@ -135,11 +135,11 @@ spider()
    cd ../
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	vulnscan
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	vulnscan
    fi
 }
 
@@ -159,13 +159,12 @@ wayback()
    cat wayback.txt gau.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | qsreplace -a | tee -a clean_url.txt
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	spider
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	spider
    fi
-
 }
 
 
@@ -195,11 +194,11 @@ linkfinder()
  #  filefuzz
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	wayback
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	wayback
    fi
 }
 
@@ -261,11 +260,11 @@ crlf()
   # rm "$domain"_unique.txt
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	linkfinder
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	linkfinder
    fi
 }
 
@@ -323,12 +322,12 @@ s3scan()
   #cp bucket_finder_op.txt "$current"/"$domain"/"$subdirectory"/subdomains/
   # rm bucket_finder_op.txt "$domain"_unique.txt
   if [ -z "$module" ]
-   then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+  then
+	crlf
+  else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	crlf
    fi
 }
 
@@ -358,13 +357,12 @@ dirbruteforce()
    #rm "$domain"_gobuster.txt
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	s3scan
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	s3scan
    fi
-
 }
 
 
@@ -423,11 +421,11 @@ portscan()
    mv naabu_output_targets.txt ../portscan/
    if [ -z "$module" ]
    then
-        echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
+	dirbruteforce
+   else
+	echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
         exit 0
-   else
-	dirbruteforce
    fi
 }
 

@@ -56,3 +56,29 @@ fi
 #		echo "Reachable"
 #	fi
 #done
+ff3(){
+echo "hi"
+}
+portscan(){
+ff3
+}
+subdomain(){
+portscan
+}
+while getopts ":d:h:m:" opt
+do
+   case "$opt" in
+      d ) domain="$OPTARG" ;;
+      m ) module="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+echo "$domain"
+echo "$module"
+if [ -z "$module" ]
+then
+        subdomain
+else
+        "$module"
+fi
