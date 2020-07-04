@@ -14,67 +14,103 @@ Make sure you run install.sh with sudo privileges.
 3) Search the term "ss" and put your ssrf domain without quotes.
 4) Search the term "your-wordlist" and replace it with the wordlist you want to bruteforce directory and files.
 5) If you wish you can change wordlists os s3scan,(OPTIONAL) to do that you can copy your wordlist to /root/scripts/bounty/cloud_enum/ and change the file name by searching the term "permutations.txt"
+```
 
 # Prerequisites
 
-```
-GO 1.13+
+
+`GO 1.13+
+
 Python3.6 +
+
 python2.7
+
 pip2
+
 pip3
+
 rust
+
 make
+
 perl
+
 gf-patterns
+
 figlet
-```
+`
 Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
 
 # Rust tool implemented in this script
 
-```
+`
 findomain
-```
+`
 
 # GO Tools Implemented in this script
 
-```
-assetfinder
+
+`assetfinder
+
 subfinder
+
 amass
+
 httprobe
+
 aquatone
+
 subjack
+
 Subover
+
 tko-subs
+
 naabu
+
 ffuf
+
 Waybackurl
+
 gau
+
 gospider
+
 jaeles
+
 nuclei
+
 kxss
+
 dalfox
+
 gf
+
 qsreplace
+
 unfurl
-```
+`
 
 
 # Python tools Implemented in this script
 
-```
-github-subdomains.py
+
+`github-subdomains.py
+
 interlace
+
 cloud_enum
+
 CRLF-Injection-Scanner
+
 Linkfinder
+
 Arjun
+
 tplmap
+
 sqlmap from github
-```
+`
 
 # Features 
 added support to call specific modules
