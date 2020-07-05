@@ -245,7 +245,7 @@ crlf()
    echo -e "\e[92m[~] Scanning for CRLF injection.."
    echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
    echo "*************************************************************************************************"
-   cat subjack_input.txt | interlace -threads 20 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
+   cat subjack_input.txt | interlace -threads 10 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
    echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
