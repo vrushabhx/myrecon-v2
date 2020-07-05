@@ -58,27 +58,39 @@ fi
 #done
 ff3(){
 echo "hi"
+echo "$wordlist"
 }
 portscan(){
+echo "dalfox pipe -blind $blind "
+echo "dalfox pipe -blind $ss "
 ff3
+echo "dalfox pipe -blind $blind "
+echo "dalfox pipe -blind $blind "
 }
 subdomain(){
+ss="$ssrf"
 portscan
+ss="$ssrf"
 }
-while getopts ":d:h:m:" opt
+while getopts ":d:h:m:s:b:w:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
       m ) module="$OPTARG" ;;
+      s ) ssrf="$OPTARG" ;;
+      b ) blind="$OPTARG" ;;
+      w ) wordlist="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
 echo "$domain"
 echo "$module"
-if [ -z "$module" ]
-then
-        subdomain
-else
-        "$module"
-fi
+#if [ -z "$module" ]
+#then
+ #       subdomain
+#else
+ #       "$module"
+#fi
+
+subdomain

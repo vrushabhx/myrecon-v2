@@ -151,6 +151,23 @@ Now if you want you can resume from crlf --> linkfinder --> wayback --> spider -
 half of the vulnscan module is totally dependent on wayback and spider module.
 Only single module can be run at a time if flag has been provided.
 
+# Note
+Updating Nuclei templates?
+This script is saving nuclei templates at /root/nuclei-templates/
+after running install.sh it will create a folder called "all" and will copy all templates inside that directory.
+ProjectDiscovery is regularly updating their repo with new templates.
+To update your nuclei templates follow these commands.
+
+```
+cd /root/
+nuclei -update-templates
+cd nuclei-templates/
+mkdir all
+cp -at ./all/ ./**/*.yaml
+```
+
+All templates will be copied to all directory and will be used by myrecon.sh in future.
+
 # Installation
 
 Make sure $GOPATH has been set in .bashrc file and you can run go tools from anywhere. (Important)
@@ -163,6 +180,8 @@ Make sure $GOPATH has been set in .bashrc file and you can run go tools from any
 
 `cd ../ && mv Myrecon/ /root/scripts/bounty/ && cd /root/scripts/bounty/Myrecon/`
 
+# Updating the script
+git pull
 
 # Where-to-use
 I recommend to use VPS as it will create a lot of traffic and will take more than 8hr to complete.
@@ -173,16 +192,17 @@ Use my referral link to get 100$ credit on digital ocean for 60 days
 # How-to-use
 1) Basic scan
 
-`bash myrecon.sh -d hackerone.com`
+`bash myrecon.sh -d hackerone.com -b blindxss -s ssrf -w wordlist`
 
 2) Using module
 
-`bash myrecon.sh -d hackerone.com -m subdomain`
+`bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist`
+
 
 # TO-DO
 1) Make a HTML report.
 2) Improve specific module functionality.
-3) Take arguments from command line for wordlist.
+~~3) Take arguments from command line for wordlist, blind-xss domain, ssrf domain.~~
 4) May be more clear script.
 5) DNS brute-Forcing.
 6) Slack and/or telegram notification.

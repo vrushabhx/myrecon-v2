@@ -59,13 +59,13 @@ vulnscan()
   nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
   cd ../URLs/
-  cat clean_url.txt | grep "=" | kxss | tee -a ../vulns/xss_reflection_kxss.txt
+  cat clean_url.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cat spider_clean_1.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cat spider_clean_2.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
   cd ../vulns/
   if [ -s xss_reflection_kxss.txt ]
   then
-	cat xss_reflection_kxss.txt | dalfox pipe -blind "put your blind xss domain inside quotes" -o ../vulns/dalfox_result.txt -w 30
+	cat xss_reflection_kxss.txt | dalfox pipe -blind "$blind" -o ../vulns/dalfox_result.txt -w 30
   else
 	echo -e "\e[92m[~] No reflections has been found.."
   fi
@@ -78,7 +78,7 @@ vulnscan()
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
-  ss=put your ssrf server without quotes            #ssrftest.com or ngrok or burp private collaborator
+  ss="$ssrf"            #ssrftest.com or ngrok or burp private collaborator
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
   cat ../vulns/possible_ssrf.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_2.txt
@@ -156,7 +156,7 @@ wayback()
    echo "***********************************************************************************************"
    cat subjack_input.txt | gau | tee -a ../URLs/gau.txt
    cd ../URLs/
-   cat wayback.txt gau.txt | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | qsreplace -a | tee -a clean_url.txt
+   cat wayback.txt gau.txt | grep "=" | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | qsreplace -a | tee -a clean_url.txt
    if [ -z "$module" ]
    then
 	spider
@@ -340,7 +340,7 @@ dirbruteforce()
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
-   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w /root/wordlists/your-wordlist:FUZZ -mode clusterbomb
+   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
    #do
@@ -623,11 +623,14 @@ helpFunction()
 
 subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:m:" opt
+while getopts "d:h:m:s:b:w:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
       m	) module="$OPTARG" ;;
+      s ) ssrf="$OPTARG" ;;
+      b ) blind="$OPTARG" ;;
+      w ) wordlist="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
