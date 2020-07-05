@@ -2,19 +2,10 @@
 personal recon script for bug bounty
 
 
-# Modified this after a long time..
+## Modified this after a long time..
 
 Make sure you run install.sh with sudo privileges.
 
-# You need to change a script as argument support is limited.
-
-```
-1) Open myrecon.sh using your favourite text editor.
-2) Search the term "dalfox" and put your blind-xss domain inside quotes.
-3) Search the term "ss" and put your ssrf domain without quotes.
-4) Search the term "your-wordlist" and replace it with the wordlist you want to bruteforce directory and files.
-5) If you wish you can change wordlists os s3scan,(OPTIONAL) to do that you can copy your wordlist to /root/scripts/bounty/cloud_enum/ and change the file name by searching the term "permutations.txt"
-```
 
 # Prerequisites
 
