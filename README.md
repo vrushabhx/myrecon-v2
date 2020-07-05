@@ -193,7 +193,9 @@ Your recon data will be copied to /root/recon/ after script completion
 # TO-DO
 1) Make a HTML report.
 2) Improve specific module functionality.
+
 ~~3) Take arguments from command line for wordlist, blind-xss domain, ssrf domain.~~
+
 4) May be more clear script.
 5) DNS brute-Forcing.
 6) Slack and/or telegram notification.
