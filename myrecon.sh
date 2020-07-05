@@ -653,3 +653,6 @@ then
 else
 	"$module"
 fi
+
+cd /root/scripts/bounty/Myrecon/
+cp -r "$domain" /root/recon/

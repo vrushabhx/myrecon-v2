@@ -6,6 +6,7 @@ echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium.."
 apt install nmap figlet python3-pip python2-pip chromium-browser chromium build-essential -y
 
 mkdir -p /root/scripts/bounty/
+mkdir /root/recon/
 cd /root/scripts/bounty/
 echo -e "\e[92m[~] Make sure you have installed go,python3,python2,rust,make,perl.."
 

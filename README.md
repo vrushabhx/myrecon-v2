@@ -198,7 +198,7 @@ Use my referral link to get 100$ credit on digital ocean for 60 days
 
 `bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist`
 
-
+Your recon data will be copied to /root/recon/ after script completion
 # TO-DO
 1) Make a HTML report.
 2) Improve specific module functionality.
