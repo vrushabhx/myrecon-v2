@@ -297,9 +297,9 @@ s3scan()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] Cloud_enum will start.."
    cd /root/scripts/bounty/cloud_enum/
-   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
-   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
-   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
+   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
    cp "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt "$current"/"$domain"/"$subdirectory"/buckets/
    rm "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt
    echo "***************************************************************************************"
