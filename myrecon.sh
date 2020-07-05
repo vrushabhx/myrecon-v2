@@ -539,7 +539,7 @@ subdomain()
    cd "$current"
    cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ./"$domain"/"$subdirectory"/probing/
    cd ./"$domain"/"$subdirectory"/probing/
-   cat "$domain"_Bunique.txt | httprobe -c 150 | tee "$domain"_unique.txt
+   cat "$domain"_Bunique.txt | httprobe -c 150 -t 20000 | tee "$domain"_unique.txt
    cp "$domain"_unique.txt ../subdomains/
    echo -e "\e[92m[~] All Host checked.."
  #  echo -e "\e[92m[~] Total online.."
