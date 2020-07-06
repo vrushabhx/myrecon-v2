@@ -126,7 +126,8 @@ else
 	echo -e "\e[92m[~] Installing pentest-tools.."
 	git clone https://github.com/gwen001/pentest-tools.git
 	cd pentest-tools/
-	pip3 install -r requirements.txt
+	pip3 install -r requirements3.txt
+	pip2 install -r requirements2.txt
 	wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/LFI/LFI-Jhaddix.txt
 	cd ../
 
@@ -143,14 +144,14 @@ fi
 
 echo "***************************************************************************************"
 echo -e "\e[92m[~] Installing GO tools.."
-echo -e "\e[92m[~] setting GOPATH for you.."
-echo "export GOPATH=$HOME/work" >> /root/.bashrc
-echo "export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin" >> /root/.bashrc
-echo "export GOPATH=$HOME/go" >> /root/.bashrc
-echo "PATH=$GOPATH/bin:$PATH" >> /root/.bashrc
-echo "export GOROOT=/root/.go" >> /root/.bashrc
-echo "export GOPATH=/root/go" >> /root/.bashrc
-echo "export PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> /root/.bashrc
+#echo -e "\e[92m[~] setting GOPATH for you.."
+#echo "export GOPATH=$HOME/work" >> /root/.bashrc
+#echo "export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin" >> /root/.bashrc
+#echo "export GOPATH=$HOME/go" >> /root/.bashrc
+#echo "PATH=$GOPATH/bin:$PATH" >> /root/.bashrc
+#echo "export GOROOT=/root/.go" >> /root/.bashrc
+#echo "export GOPATH=/root/go" >> /root/.bashrc
+#echo "export PATH=$PATH:$GOROOT/bin:$GOPATH/bin" >> /root/.bashrc
 
 if ! command -v assetfinder &> /dev/null
 then
