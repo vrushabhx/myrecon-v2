@@ -94,3 +94,10 @@ echo "$module"
 #fi
 
 subdomain
+
+if [ -d Interlace ]
+then
+	echo "exist"
+else
+	echo "no"
+fi

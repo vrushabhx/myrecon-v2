@@ -173,6 +173,7 @@ Make sure $GOPATH has been set in .bashrc file and you can run go tools from any
 
 # Updating the script
 git pull
+bash install.sh
 
 # Where-to-use
 I recommend to use VPS as it will create a lot of traffic and will take more than 8hr to complete.

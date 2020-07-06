@@ -97,9 +97,29 @@ vulnscan()
   cd ../URLs/
 #open-redirect
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
+  cd ../vulns/
+  if [ -s possible_OR.txt ]
+  then
+	echo -e "\e[92m[~] Checking for openredirect.."
+	python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 40
+  else
+	echo -e "\e[92m[~] No patterns found.."
+  fi
 #LFI
+  cd ../URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf lfi | tee -a ../vulns/possible_lfi.txt
+  cd ../vulns/
+  if [ -s possible_lfi.txt ]
+  then
+	echo -e "\e[92m[~] Checking for LFI.."
+	python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
+	cp -r crlf/ lfi
+	rm -r crlf
+  else
+	echo -e "\e[92m[~] No patterns found.."
+  fi
 #RCE
+  cd ../URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf rce | tee -a ../vulns/possible_rce.txt
 #SQLi
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
