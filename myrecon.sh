@@ -82,9 +82,7 @@ vulnscan()
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
   cat ../vulns/possible_ssrf.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_2.txt
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_3.txt
   ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100 -of html -o ../vulns/ssrf_2_result_ffuf.html
-  ffuf -w ../vulns/possible_ssrf_3.txt -u FUZZ -t 300 -of html -o ../vulns/ssrf_3_result_ffuf.html
 #IDOR
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
 #SSTI
