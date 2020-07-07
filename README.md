@@ -131,6 +131,8 @@ added support to call specific modules
 
 `vulnscan: sql, xss, CVE scanning`
 
+`gitrecon: github recon for sensitive information disclosure`
+
 
 # Note
 To call specific modules, you must have ran the script at least one time with succesful completion of subdomain module.
