@@ -366,5 +366,5 @@ then
 	go get -u github.com/hakluke/hakcheckurl
 else
 	echo -e "\e[92m[~] hakcheckurl already exist..skipping"
-
+fi
 echo -e "\e[92m[~] Installation completed.."
