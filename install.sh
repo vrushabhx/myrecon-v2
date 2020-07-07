@@ -6,7 +6,6 @@ echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium.."
 apt install nmap figlet python3-pip python2-pip chromium-browser chromium build-essential -y
 
 mkdir -p /root/scripts/bounty/
-mkdir /root/recon/
 cd /root/scripts/bounty/
 echo -e "\e[92m[~] Make sure you have installed go,python3,python2,rust,make,perl.."
 
@@ -140,6 +139,27 @@ then
 else
 	echo -e "\e[92m[~] Installing sqlmap.."
 	git clone --depth 1 https://github.com/sqlmapproject/sqlmap.git sqlmap-dev
+fi
+
+if [ -d gitGraber ]
+then
+	echo -e "\e[92m[~] gitGraber already exist.. skipping installation.."
+        echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
+else
+	echo -e "\e[92m[~] Installing gitGraber.."
+	git clone https://github.com/hisxo/gitGraber.git
+	cd gitGraber/
+	pip3 install -r requirements.txt
+	echo -e "\e[92m[~] Edit config.py with github and slcak tokens.."
+fi
+
+if [ -d smuggler ]
+then
+	echo -e "\e[92m[~] smuggler already exist.. skipping installation.."
+        echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
+else
+	echo -e "\e[92m[~] Installing smuggler.."
+	git clone https://github.com/defparam/smuggler.git
 fi
 
 echo "***************************************************************************************"
@@ -339,5 +359,12 @@ then
 else
 	echo -e "\e[92m[~] unfurl already exist..skipping"
 fi
+
+if ! command -v hakcheckurl &> /dev/null
+then
+	echo -e "\e[92m[~] Installing hakcheckurl.."
+	go get -u github.com/hakluke/hakcheckurl
+else
+	echo -e "\e[92m[~] hakcheckurl already exist..skipping"
 
 echo -e "\e[92m[~] Installation completed.."

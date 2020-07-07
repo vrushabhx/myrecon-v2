@@ -1,6 +1,6 @@
 #!/bin/bash
 massdns=/root/scripts/bounty/massdns/bin/massdns
-subdirectory=recon-$(date +"%Y-%m-%d")
+#subdirectory=recon-$(date +"%Y-%m-%d")
 domain=google.com
 clear
 banner=`figlet -f slant myrecon`
@@ -29,22 +29,22 @@ echo ""
 #do
 #	echo "$concat"
 #done
-a=1
-b=`wc -l out.csv | cut -d " " -f 1`
-echo "$b"
-if [ "$b" == 1 ]
-then
-	echo "one"
-else
-	echo "Two"
-fi
+#a=1
+#b=`wc -l out.csv | cut -d " " -f 1`
+#echo "$b"
+#if [ "$b" == 1 ]
+#then
+#	echo "one"
+#else
+#	echo "Two"
+#fi
 
-if ! command -v findomains &> /dev/null
-then
-	echo "not exist"
-else
-	echo "yes"
-fi
+#if ! command -v findomains &> /dev/null
+#then
+#	echo "not exist"
+#else
+#	echo "yes"
+#fi
 #for host1 in `cat seek.com.au_unique1.txt`
 #do
 #	if [ $(curl -I "$host1" --write-out %{http_code} -m 3 --silent --output /dev/null) == 000 ]
@@ -57,22 +57,24 @@ fi
 #	fi
 #done
 ff3(){
-echo "hi"
-echo "$wordlist"
+#echo "hi"
+#echo "$wordlist"
+echo "$subdirectory"
 }
 portscan(){
-echo "dalfox pipe -blind $blind "
-echo "dalfox pipe -blind $ss "
+#echo "dalfox pipe -blind $blind "
+#echo "dalfox pipe -blind $ss "
+echo "$subdirectory"
 ff3
-echo "dalfox pipe -blind $blind "
-echo "dalfox pipe -blind $blind "
+#echo "dalfox pipe -blind $blind "
+#echo "dalfox pipe -blind $blind "
 }
 subdomain(){
 ss="$ssrf"
 portscan
 ss="$ssrf"
 }
-while getopts ":d:h:m:s:b:w:" opt
+while getopts ":d:h:m:s:b:w:f:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
@@ -80,6 +82,7 @@ do
       s ) ssrf="$OPTARG" ;;
       b ) blind="$OPTARG" ;;
       w ) wordlist="$OPTARG" ;;
+      f ) directory="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -93,7 +96,7 @@ echo "$module"
  #       "$module"
 #fi
 
-subdomain
+#subdomain
 
 if [ -d Interlace ]
 then
@@ -101,3 +104,19 @@ then
 else
 	echo "no"
 fi
+echo "$directory"
+abc(){
+subdirectory="$directory"
+}
+user_directory(){
+subdirectory=recon-$(date +"%Y-%m-%d")
+}
+if [ -z "$directory" ]
+then
+	echo "helo"
+	user_directory
+else
+	echo "heello"
+	abc
+fi
+portscan

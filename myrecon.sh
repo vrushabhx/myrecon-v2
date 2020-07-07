@@ -12,24 +12,18 @@ current=`pwd`
 #IP=`ifconfig wlan1 | grep "inet " | cut -d ' ' -f 10`
 
 
-#gitrecon()
-#{
- #  cd "$current"
- #  rm *.csv "$domain"_Bunique.txt "$domain"_unique.txt
- #  git=`echo "$domain" | cut -d "." -f 1`
- #  echo -e "\e[92m[~] Slurp will be in action.."
- #  echo "***************************************************************************************"
- #  cd /root/go/src/github.com/0xbharath/slurp/
- #  sleep 3
- #  ./main domain -t "$domain"
- #  ./main keyword -t "$domain"
- #  echo -e "\e[92m[~] Slurp completed.."
- #  echo "***************************************************************************************"
- #  echo -e "\e[92m[~] gitrob will be in  action.."
- #  cd /root/go/src/github.com/michenriksen/gitrob/
+gitrecon()
+{
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
+   cd ../github_recon
+   echo "***************************************************************************************"
+   echo -e "\e[92m[~] gitgraber will be in action.."
+   cd /root/scripts/bounty/gitGraber/
+   python3 gitGraber.py -k keywordsfile.txt -q "$domain" -s | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
+   cd "$current"
  #  ./main -save "$domain"_gitrob -threads 100 "$git"
  #  cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
-#}
+}
 #screenshot()
 #{
 #   cd "$current"
@@ -65,7 +59,8 @@ vulnscan()
   cd ../vulns/
   if [ -s xss_reflection_kxss.txt ]
   then
-	cat xss_reflection_kxss.txt | dalfox pipe -blind "$blind" -o ../vulns/dalfox_result.txt -w 30
+	cat xss_reflection_kxss.txt | cut -d " " -f 9 > dalfox_input.txt
+	cat dalfox_input.txt | dalfox pipe -blind "$blind" -o ../vulns/dalfox_result.txt -w 30
   else
 	echo -e "\e[92m[~] No reflections has been found.."
   fi
@@ -88,10 +83,15 @@ vulnscan()
 #SSTI
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssti | tee -a ../vulns/possible_ssti.txt
   cd ../vulns/
-  for line in `cat possible_ssti.txt`;
-  do
-	echo $line && python /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
-  done
+  ssti=200
+  t=`cat possible_ssti.txt | wc -l`
+  if [ "$ssti" -gt "$t" ]
+  then
+  	for line in `cat possible_ssti.txt`;
+  	do
+		echo $line && python /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
+  	done
+  fi
   cd ../URLs/
 #open-redirect
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
@@ -110,7 +110,7 @@ vulnscan()
   if [ -s possible_lfi.txt ]
   then
 	echo -e "\e[92m[~] Checking for LFI.."
-	python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
+	python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
 	cp -r crlf/ lfi
 	rm -r crlf
   else
@@ -123,12 +123,13 @@ vulnscan()
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
   cd ../vulns/
   mkdir sql_result
-  a=50
+  mkdir POC
+  sql=50
   b=`cat possible_sqli.txt | wc -l`
   if [ -s possible_sqli.txt ]
   then
         echo -e "\e[92m[~] File found with content.."
-	if [ "$a" -gt "$b" ]
+	if [ "$sql" -gt "$b" ]
 	then
 		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
 	else
@@ -140,6 +141,18 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  cd ../URLs/
+  cat clean_url.txt | grep "=" | hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
+  cp smuggle_input.txt /root/scripts/bounty/smuggler/
+  cd /root/scripts/bounty/smuggler/
+  cat smuggle_input.txt | python3 smuggler.py -x -q -l smuggler_output_defparam.txt
+  mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/
+  cp -r payloads/ "$current"/"$domain"/"$subdirectory"/vulns/POC/
+  rm -v !("README.md")
+  cd ../pentest-tools/
+  python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
+  mv smuggler/ "$current"/"$domain"/"$subdirectory"/vulns/
+  gitrecon
 }
 
 spider()
@@ -639,7 +652,7 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
-subdirectory=recon-$(date +"%Y-%m")
+#subdirectory=recon-$(date +"%Y-%m")
 
 while getopts "d:h:m:s:b:w:" opt
 do
@@ -653,6 +666,21 @@ do
    esac
 done
 
+user_directory(){
+subdirectory="$directory"
+}
+auto_directory(){
+subdirectory=recon-$(date +"%Y-%m-%d")
+}
+if [ -z "$directory" ]
+then
+        echo "helo"
+        auto_directory
+else
+        echo "heello"
+        user_directory
+fi
+
 mkdir ./"$domain"
 mkdir ./"$domain"/"$subdirectory"
 mkdir ./"$domain"/"$subdirectory"/subdomains
@@ -663,14 +691,13 @@ mkdir ./"$domain"/"$subdirectory"/buckets
 mkdir ./"$domain"/"$subdirectory"/URLs
 mkdir ./"$domain"/"$subdirectory"/portscan
 mkdir ./"$domain"/"$subdirectory"/vulns
+mkdir ./"$domain"/"$subdirectory"/github_recon
 
 clear
-if [ -z "$module" ]
+Cif [ -z "$module" ]
 then
 	subdomain
 else
 	"$module"
 fi
 
-cd /root/scripts/bounty/Myrecon/
-cp -r "$domain" /root/recon/

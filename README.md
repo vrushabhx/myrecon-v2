@@ -81,9 +81,12 @@ findomain
 
 `unfurl`
 
+`hakcheckurl`
 
 # Python tools Implemented in this script
 
+
+`smuggler`
 
 `github-subdomains.py`
 
@@ -101,6 +104,9 @@ findomain
 
 `sqlmap from github`
 
+`pentest-tools`
+
+`gitGraber`
 
 # Features 
 added support to call specific modules
@@ -190,7 +196,22 @@ Use my referral link to get 100$ credit on digital ocean for 60 days
 
 `bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist`
 
-Your recon data will be copied to /root/recon/ after script completion
+
+## Note
+Use -f flag only with -m flag..
+script will create subfolder date-wise and if you want to scan specific module with the specific data you collected on certain day pass the subfolder as an argument.
+
+example:
+you ran the script on hackerone.com on date 06/07/2020.
+you decided to scan again on 07/07/2020.
+Two folder will be created under hackerone.com directory.
+
+Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use following command.
+
+`bash myrecon.sh -d hackerone.com -m vulnscan -b [yourdomain] -s [yourdomain] -f /root/scripts/bounty/Myrecon/hackerone.com/recon-2020-07-06`
+
+Always give an absolute path
+
 # TO-DO
 1) Make a HTML report.
 2) Improve specific module functionality.
@@ -200,8 +221,10 @@ Your recon data will be copied to /root/recon/ after script completion
 4) May be more clear script.
 5) DNS brute-Forcing.
 6) Slack and/or telegram notification.
-7) Request smuggling.
-8) Github recon.
+
+~~7) Request smuggling.~~
+
+~~8) Github recon.~~
 
 # Want-to-Contribute?
 Create a pull request for suggestions,bugs.
