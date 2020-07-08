@@ -696,7 +696,7 @@ mkdir ./"$domain"/"$subdirectory"/vulns
 mkdir ./"$domain"/"$subdirectory"/github_recon
 
 clear
-Cif [ -z "$module" ]
+if [ -z "$module" ]
 then
 	subdomain
 else
