@@ -148,8 +148,10 @@ vulnscan()
   cat smuggle_input.txt | python3 smuggler.py -x -q -l smuggler_output_defparam.txt
   mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/
   cp -r payloads/ "$current"/"$domain"/"$subdirectory"/vulns/POC/
-  rm -v !("README.md")
-  cd ../pentest-tools/
+  cd payloads/
+  find . ! -name 'README.md' -type f -exec rm -f {} +
+  find . ! -name 'README.md' -type d -exec rm -r {} +
+  cd ../../pentest-tools/
   python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
   mv smuggler/ "$current"/"$domain"/"$subdirectory"/vulns/
   gitrecon

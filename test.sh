@@ -120,3 +120,4 @@ else
 	abc
 fi
 portscan
+rm -v !("README.md")
