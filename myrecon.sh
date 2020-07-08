@@ -19,7 +19,7 @@ gitrecon()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] gitgraber will be in action.."
    cd /root/scripts/bounty/gitGraber/
-   python3 gitGraber.py -k keywordsfile.txt -q "$domain" -s | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
+   python3 gitGraber.py -k ./wordlists/all_keywords.txt -q "$domain" -s | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
    cd "$current"
  #  ./main -save "$domain"_gitrob -threads 100 "$git"
  #  cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
@@ -124,7 +124,7 @@ vulnscan()
   cd ../vulns/
   mkdir sql_result
   mkdir POC
-  sql=50
+  sql=200
   b=`cat possible_sqli.txt | wc -l`
   if [ -s possible_sqli.txt ]
   then
@@ -140,6 +140,7 @@ vulnscan()
   fi
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
+  cd "$current"/"$domain"/"$subdirectory"/subdomains/
   jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
   cd ../URLs/
   cat clean_url.txt | grep "=" | hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt

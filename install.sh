@@ -150,6 +150,8 @@ else
 	git clone https://github.com/hisxo/gitGraber.git
 	cd gitGraber/
 	pip3 install -r requirements.txt
+	cd wordlists/
+	cat * > all_keywords.txt
 	echo -e "\e[92m[~] Edit config.py with github and slcak tokens.."
 fi
 
