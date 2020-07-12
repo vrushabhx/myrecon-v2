@@ -20,6 +20,8 @@ gitrecon()
    echo -e "\e[92m[~] gitgraber will be in action.."
    cd /root/scripts/bounty/gitGraber/
    python3 gitGraber.py -k ./wordlists/all_keywords.txt -q "$domain" -s | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
+   cd "$current"/"$domain"/"$subdirectory"/github_recon/
+   cat gitgraber_result.txt | grep -E "(TOKEN FOUND|Token :|RAW URL :|Repository URL :)" >> github_tokens_found.txt
    cd "$current"
  #  ./main -save "$domain"_gitrob -threads 100 "$git"
  #  cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
@@ -100,6 +102,10 @@ vulnscan()
   then
 	echo -e "\e[92m[~] Checking for openredirect.."
 	python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 40
+	cd openredirect/
+	grep "VULNERABLE" output >> OR_output.txt
+	rm output
+	cd ../
   else
 	echo -e "\e[92m[~] No patterns found.."
   fi
@@ -113,6 +119,11 @@ vulnscan()
 	python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
 	cp -r crlf/ lfi
 	rm -r crlf
+	cd lfi/
+	grep "VULNERABLE" output >> lfi_output.txt
+	rm output
+	cd ../
+
   else
 	echo -e "\e[92m[~] No patterns found.."
   fi
@@ -133,7 +144,7 @@ vulnscan()
 	then
 		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
 	else
-		echo -e "\e[92m[~] File with more than $a line will not be scanned.."
+		echo -e "\e[92m[~] File with more than $b line will not be scanned.."
 	fi
   else
         echo -e "\e[92m[~] No patterns found for sqli.."
@@ -141,21 +152,39 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-  jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
   cd ../URLs/
   cat clean_url.txt | grep "=" | hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
   cp smuggle_input.txt /root/scripts/bounty/smuggler/
   cd /root/scripts/bounty/smuggler/
-  cat smuggle_input.txt | python3 smuggler.py -x -q -l smuggler_output_defparam.txt
-  mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/
-  cp -r payloads/ "$current"/"$domain"/"$subdirectory"/vulns/POC/
-  cd payloads/
-  find . ! -name 'README.md' -type f -exec rm -f {} +
-  find . ! -name 'README.md' -type d -exec rm -r {} +
+  smg=200
+  d=`cat smuggle_input.txt | wc -l`
+  if [ "$smg" -gt "$d" ]
+  then
+	cat smuggle_input.txt | python3 smuggler.py -x -q -l smuggler_output_defparam.txt -c exhaustive.py
+	mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/
+	cp -r payloads/ "$current"/"$domain"/"$subdirectory"/vulns/POC/
+	cd payloads/
+	find . ! -name 'README.md' -type f -exec rm -f {} +
+	find . ! -name 'README.md' -type d -exec rm -r {} +
+  else
+	echo -e "\e[92m[~] File with more than $d line will not be scanned.."
+  fi
   cd ../../pentest-tools/
   python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
+  cd smuggler/
+  grep "VULNERABLE" output >> smuggler_output.txt
+  rm output
+  cd ../
   mv smuggler/ "$current"/"$domain"/"$subdirectory"/vulns/
-  gitrecon
+  if [ -z "$module" ]
+   then
+	gitrecon
+   else
+        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
+        echo "************************************************************************************"
+        exit 0
+   fi
 }
 
 spider()
@@ -531,7 +560,7 @@ subdomain()
    cat ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/github_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
-   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
+   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
    if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
    then
 	echo -e "\e[92m[~] File compiled,sorted successfully"
@@ -573,7 +602,7 @@ subdomain()
    cd "$current"
    cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ./"$domain"/"$subdirectory"/probing/
    cd ./"$domain"/"$subdirectory"/probing/
-   cat "$domain"_Bunique.txt | httprobe -c 150 -t 20000 | tee "$domain"_unique.txt
+   cat "$domain"_Bunique.txt | httprobe -c 150 -t 20000 | tee -a "$domain"_unique.txt
    cp "$domain"_unique.txt ../subdomains/
    echo -e "\e[92m[~] All Host checked.."
  #  echo -e "\e[92m[~] Total online.."

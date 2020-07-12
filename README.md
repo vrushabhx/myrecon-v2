@@ -110,6 +110,7 @@ findomain
 
 # Features 
 added support to call specific modules
+date-wise folder creation to differentiate your past recon.
 
 # Modules included
 
@@ -215,18 +216,14 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 Always give an absolute path
 
 # TO-DO
-1) Make a HTML report.
-2) Improve specific module functionality.
-
-~~3) Take arguments from command line for wordlist, blind-xss domain, ssrf domain.~~
-
-4) May be more clear script.
-5) DNS brute-Forcing.
-6) Slack and/or telegram notification.
-
-~~7) Request smuggling.~~
-
-~~8) Github recon.~~
+- [ ] Make a HTML report.
+- [ ] Improve specific module functionality.
+- [x] Take arguments from command line for wordlist, blind-xss domain, ssrf domain.
+- [ ] May be more clear script.
+- [ ] DNS brute-Forcing.
+- [ ] Slack and/or telegram notification.
+- [x] Request smuggling.
+- [x] Github recon.
 
 # Want-to-Contribute?
 Create a pull request for suggestions,bugs.
