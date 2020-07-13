@@ -170,7 +170,7 @@ vulnscan()
   else
 	echo -e "\e[92m[~] File with more than $d line will not be scanned.."
   fi
-  cd ../../pentest-tools/
+  cd ../pentest-tools/
   python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
   cd smuggler/
   grep "VULNERABLE" output >> smuggler_output.txt

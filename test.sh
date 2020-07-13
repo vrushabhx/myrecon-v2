@@ -64,8 +64,8 @@ echo "$subdirectory"
 portscan(){
 #echo "dalfox pipe -blind $blind "
 #echo "dalfox pipe -blind $ss "
-echo "$subdirectory"
-ff3
+#echo "$subdirectory"
+#ff3
 #echo "dalfox pipe -blind $blind "
 #echo "dalfox pipe -blind $blind "
 }
@@ -87,8 +87,8 @@ do
    esac
 done
 
-echo "$domain"
-echo "$module"
+#echo "$domain"
+#echo "$module"
 #if [ -z "$module" ]
 #then
  #       subdomain
@@ -98,26 +98,33 @@ echo "$module"
 
 #subdomain
 
-if [ -d Interlace ]
-then
-	echo "exist"
-else
-	echo "no"
-fi
-echo "$directory"
+#if [ -d Interlace ]
+#then
+#	echo "exist"
+#else
+#	echo "no"
+#fi
+#echo "$directory"
 abc(){
 subdirectory="$directory"
 }
 user_directory(){
 subdirectory=recon-$(date +"%Y-%m-%d")
 }
-if [ -z "$directory" ]
-then
-	echo "helo"
-	user_directory
-else
-	echo "heello"
-	abc
-fi
-portscan
-rm -v !("README.md")
+#if [ -z "$directory" ]
+#then
+#	echo "helo"
+#	user_directory
+#else
+#	echo "heello"
+#	abc
+#fi
+#portscan
+#rm -v !("README.md")
+
+
+
+
+report()
+
+
