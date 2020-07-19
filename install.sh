@@ -165,18 +165,18 @@ else
 	cat * > all_keywords.txt
 	echo -e "\e[92m[~] Edit config.py with github and slcak tokens.."
 fi
+cd /root/scripts/bounty/
 
 if [ -d smuggler ]
 then
 	echo -e "\e[92m[~] smuggler already exist.. skipping installation.."
         echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
 else
-	cd ../../
 	echo -e "\e[92m[~] Installing smuggler.."
 	git clone https://github.com/defparam/smuggler.git
 fi
 
-if [ -d dsnvalidator ]
+if [ -d dnsvalidator ]
 then
 	echo -e "\e[92m[~] dnsvalidatior already exist.. skipping installation.."
 	echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
