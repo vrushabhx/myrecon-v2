@@ -210,15 +210,16 @@ else
 	cd ../
 fi
 
-if [ -d altdns ]
+if [ -d dnsgen ]
 then
-        echo -e "\e[92m[~] altdns already exist.. skipping installation.."
+        echo -e "\e[92m[~] dnsgen already exist.. skipping installation.."
         echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
 else
-	git clone https://github.com/infosec-au/altdns.git
-	cd altdns/
-	pip2 install -r requirements.txt
-	python setup.py install
+	git clone https://github.com/ProjectAnte/dnsgen
+	cd dnsgen
+	pip3 install -r requirements.txt
+	python3 setup.py install
+	wget https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt
 	wget https://raw.githubusercontent.com/ProjectAnte/dnsgen/master/dnsgen/words.txt
 	cat words.txt words.txt.1 | sort -u > /root/scripts/bounty/wordlists/alter.txt
 	cd ../

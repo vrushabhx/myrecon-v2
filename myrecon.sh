@@ -573,19 +573,24 @@ subdomain()
    echo "*****************************************************************************************"
    sleep 2
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
-   echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
+   echo -e "\e[92m[~] passing file to shuffledns for active DNS resolution"
 #   echo "*****************************************************************************************"
    cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
    cd ./"$domain"/"$subdirectory"/subdomains/
+   echo -e "\e[92m[~] Bruteforcing $domain for subdomains"
+   echo "*****************************************************************************************"
    shuffledns -d "$domain" -r resolvers_used.txt -w dns_wordlist.txt -silent -o brute_shuffledns.txt
+   echo -e "\e[92m[~] resolving domains which are found by other tools"
+   echo "*****************************************************************************************"
    shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
    cat resolved_shuffledns.txt | sort -u >> brute_shuffledns.txt
    cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
 #   massdns -r /root/scripts/bounty/wordlists/resolvers.txt "$domain"_Bunique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
 #   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 | sed 's/.$//g' | sort -u > ./"$domain"/"$subdirectory"/subdomains/massdns_Balt.txt
-   altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
+#   altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
+   dnsgen -w /root/scripts/bounty/wordlists/alter.txt "$domain"_Bunique.txt > dnsgen.txt
    cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
-   shuffledns -list altdns.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
+   shuffledns -list dnsgen.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
    cat resolved_altdns.txt >> brute_shuffledns.txt
    cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
  #  cp ./"$domain"/"$subdirectory"/subdomains/altdns.txt "$current"
