@@ -593,6 +593,7 @@ subdomain()
    shuffledns -list dnsgen.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
    cat resolved_altdns.txt >> brute_shuffledns.txt
    cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
+   rm dnsgen.txt
  #  cp ./"$domain"/"$subdirectory"/subdomains/altdns.txt "$current"
  #  $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt altdns.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns_altdns.txt
  #  echo -e "\e[92m[~] Compiling results in File"
