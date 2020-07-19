@@ -190,10 +190,15 @@ else
 	cd wordlists/
 	echo -e "\e[92m[~] gathering working dnsresolvers..This is one time..please wait.."
 	echo -e "\e[92m[~] If you wish to change resolvers list for bruteforcing change it here /root/scripts/bounty/wordlists"
-	wget https://public-dns.info/nameservers.txt
-	cat /root/scripts/bounty/massdns/lists/resolvers.txt >> nameservers.txt
-	dnsvalidator -tL nameservers.txt -threads 50 --silent >> resolvers.txt
-	echo -e "\e[92m[~] Gathered public dns servers for subdomain bruteforcing.."
+	if [ -f resolvers.txt ]
+	then
+		echo "resolvers already exist"
+	else
+		wget https://public-dns.info/nameservers.txt
+		cat /root/scripts/bounty/massdns/lists/resolvers.txt >> nameservers.txt
+		dnsvalidator -tL nameservers.txt -threads 50 --silent >> resolvers.txt
+		echo -e "\e[92m[~] Gathered public dns servers for subdomain bruteforcing.."
+	fi
 	cd ../
 fi
 
