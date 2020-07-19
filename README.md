@@ -31,6 +31,8 @@ Make sure you run install.sh with sudo privileges.
 
 Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
 
+You need to give token using "-t" flag for scrapping subdomains from github. "Token without any permission"
+
 # C tool implemented in this script
 
 `massdns`
@@ -207,7 +209,7 @@ Use my referral link to get 100$ credit on digital ocean for 60 days
 
 2) Using module
 
-`bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist`
+`bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist -t github_token`
 
 
 ## Note
@@ -239,3 +241,4 @@ Always give an absolute path
 
 # Want-to-Contribute?
 Create a pull request for suggestions,bugs.
+

@@ -552,7 +552,7 @@ subdomain()
    echo -e "\e[92m[~] findomain scan completed"
    echo -e "\e[93m[~] finding subdomains from github.."
    cd /root/scripts/bounty/github-search/
-   python3 github-subdomains.py -t "3eaa91453b38ef456900f31f91cb4024d65dc5fb" -d "$domain" | tee -a "$current"/"$domain"/"$subdirectory"/subdomains/github_domains.txt
+   python3 github-subdomains.py -t "$token" -d "$domain" | tee -a "$current"/"$domain"/"$subdirectory"/subdomains/github_domains.txt
    echo "*****************************************************************************************"
    echo "*****************************************************************************************"
    echo -e "\e[92m[~] Compiling unique results to scan"
@@ -697,7 +697,7 @@ helpFunction()
 
 #subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:m:s:b:w:" opt
+while getopts "d:h:m:s:b:w:t:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
@@ -705,6 +705,7 @@ do
       s ) ssrf="$OPTARG" ;;
       b ) blind="$OPTARG" ;;
       w ) wordlist="$OPTARG" ;;
+      t ) token="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
