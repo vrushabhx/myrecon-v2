@@ -37,6 +37,14 @@ then
         git clone https://github.com/blechschmidt/massdns.git
 	cd massdns/
 	make
+	if ! command -v massdns &> /dev/null
+	then
+		echo -e "\e[92m[~] copying massdns manually"
+		cp bin/massdns /usr/local/bin/massdns
+	else
+		echo -e "\e[92m[~] Some problem with your system fix the issue for massdns and then continue."
+		exit 1
+	fi
 	cd ../
 else
         echo -e "\e[93m[~] Skipping installation for massdns.."
