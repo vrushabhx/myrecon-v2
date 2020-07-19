@@ -382,7 +382,7 @@ then
 else
 	echo -e "\e[92m[~] gf already exist..skipping"
 fi
-
+cd /root/scripts/bounty/
 if [ -d Gf-Patterns ]
 then
 	echo -e "\e[92m[~] gf-patterns already exist..skipping"
