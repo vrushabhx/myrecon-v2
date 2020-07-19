@@ -575,7 +575,7 @@ subdomain()
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
    echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
 #   echo "*****************************************************************************************"
-   cat root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
+   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
    cd ./"$domain"/"$subdirectory"/subdomains/
    shuffledns -d "$domain" -r resolvers_used.txt -w dns_wordlist.txt -silent -o brute_shuffledns.txt
    shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
@@ -584,7 +584,7 @@ subdomain()
 #   massdns -r /root/scripts/bounty/wordlists/resolvers.txt "$domain"_Bunique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
 #   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 | sed 's/.$//g' | sort -u > ./"$domain"/"$subdirectory"/subdomains/massdns_Balt.txt
    altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
-   cat root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
+   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
    shuffledns -list altdns.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
    cat resolved_altdns.txt >> brute_shuffledns.txt
    cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
