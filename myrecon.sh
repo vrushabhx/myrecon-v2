@@ -579,7 +579,7 @@ subdomain()
    cd ./"$domain"/"$subdirectory"/subdomains/
    echo -e "\e[92m[~] Bruteforcing $domain for subdomains"
    echo "*****************************************************************************************"
-   shuffledns -d "$domain" -r resolvers_used.txt -w dns_wordlist.txt -silent -o brute_shuffledns.txt
+   shuffledns -d "$domain" -r resolvers_used.txt -w /root/scripts/bounty/wordlists/dns_wordlist.txt -silent -o brute_shuffledns.txt
    echo -e "\e[92m[~] resolving domains which are found by other tools"
    echo "*****************************************************************************************"
    shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
