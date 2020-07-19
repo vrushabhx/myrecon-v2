@@ -35,3 +35,5 @@ echo "Running nmap service scan on found results."
 echo "Executing nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV"
 
 cat "$TARGETSFILE" | interlace -c "nmap _target_ -p ${ports:0:-1} -sV" -threads 20 -v | tee -a ../portscan/nmap_result.txt
+cat ../portscan/nmap_result.txt | grep -vE "(SF:|SF-P|NEXT SERVICE FINGERPRINT|[THREAD])" > ../portscan/nmap_result_filtered.txt
+rm ../portscan/nmap_result.txt

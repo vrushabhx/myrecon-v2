@@ -403,7 +403,9 @@ dirbruteforce()
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
-   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w "$domain"_unique.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
+   cat "$domain"_unique.txt | hakcheckurl | grep -E "(403|401|200)" >> ffuf_input.txt
+   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
+   mv ffuf_input.txt ../directory/
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
    #do
@@ -560,23 +562,32 @@ subdomain()
    cat ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/github_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
-   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
-   if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
-   then
-	echo -e "\e[92m[~] File compiled,sorted successfully"
-   else
-	echo -e "\e[31m[~] File not found..can't proceed"
-	exit 1
-   fi
+#   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
+#   if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
+#   then
+#	echo -e "\e[92m[~] File compiled,sorted successfully"
+ #  else
+#	echo -e "\e[31m[~] File not found..can't proceed"
+#	exit 1
+ #  fi
    echo "*****************************************************************************************"
    sleep 2
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
-#   echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
+   echo -e "\e[92m[~] passing file to massdns for active DNS resolution"
 #   echo "*****************************************************************************************"
-#   $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt "$domain"_unique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
-#   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 3 > ./"$domain"/"$subdirectory"/subdomains/massdns_ip.txt
- #  cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 > ./"$domain"/"$subdirectory"/subdomains/massdns_domain.txt
- #  $altdns -i ./"$domain"/"$subdirectory"/subdomains/massdns_domain.txt -t 50 -w /root/scripts/bounty/altdns/words.txt -o ./"$domain"/"$subdirectory"/subdomains/altdns.txt
+   cat root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
+   cd ./"$domain"/"$subdirectory"/subdomains/
+   shuffledns -d "$domain" -r resolvers_used.txt -w dns_wordlist.txt -silent -o brute_shuffledns.txt
+   shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
+   cat resolved_shuffledns.txt | sort -u >> brute_shuffledns.txt
+   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
+#   massdns -r /root/scripts/bounty/wordlists/resolvers.txt "$domain"_Bunique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
+#   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 | sed 's/.$//g' | sort -u > ./"$domain"/"$subdirectory"/subdomains/massdns_Balt.txt
+   altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
+   cat root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
+   shuffledns -list altdns.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
+   cat resolved_altdns.txt >> brute_shuffledns.txt
+   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
  #  cp ./"$domain"/"$subdirectory"/subdomains/altdns.txt "$current"
  #  $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt altdns.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns_altdns.txt
  #  echo -e "\e[92m[~] Compiling results in File"

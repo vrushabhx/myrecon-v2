@@ -31,6 +31,17 @@ else
         echo -e "\e[93m[~] Skipping installation for amass.."
 fi
 
+if ! command -v massdns &> /dev/null
+then
+        echo -e "\e[92m[~] Not able to find massdns..Installing.."
+        git clone https://github.com/blechschmidt/massdns.git
+	cd massdns/
+	make
+	cd ../
+else
+        echo -e "\e[93m[~] Skipping installation for massdns.."
+fi
+
 if [ -d github-search ]
 then
 	echo -e "\e[92m[~] github-search already exist.. skipping installation.."
@@ -160,8 +171,44 @@ then
 	echo -e "\e[92m[~] smuggler already exist.. skipping installation.."
         echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
 else
+	cd ../../
 	echo -e "\e[92m[~] Installing smuggler.."
 	git clone https://github.com/defparam/smuggler.git
+fi
+
+if [ -d dsnvalidator ]
+then
+	echo -e "\e[92m[~] dnsvalidatior already exist.. skipping installation.."
+	echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
+else
+	echo -e "\e[92m[~] Installing dnsvalidator.."
+	git clone https://github.com/vortexau/dnsvalidator.git
+	cd dnsvalidator/
+	python3 setup.py install
+	cd ../
+	mkdir wordlists/
+	cd wordlists/
+	echo -e "\e[92m[~] gathering working dnsresolvers..This is one time..please wait.."
+	echo -e "\e[92m[~] If you wish to change resolvers list for bruteforcing change it here /root/scripts/bounty/wordlists"
+	wget https://public-dns.info/nameservers.txt
+	cat /root/scripts/bounty/massdns/lists/resolvers.txt >> nameservers.txt
+	dnsvalidator -tL nameservers.txt -threads 50 --silent >> resolvers.txt
+	echo -e "\e[92m[~] Gathered public dns servers for subdomain bruteforcing.."
+	cd ../
+fi
+
+if [ -d altdns ]
+then
+        echo -e "\e[92m[~] altdns already exist.. skipping installation.."
+        echo -e "\e[92m[~] To update specific tools use git pull from tool directory.."
+else
+	git clone https://github.com/infosec-au/altdns.git
+	cd altdns/
+	pip2 install -r requirements.txt
+	python setup.py install
+	wget https://raw.githubusercontent.com/ProjectAnte/dnsgen/master/dnsgen/words.txt
+	cat words.txt words.txt.1 | sort -u > /root/scripts/bounty/wordlists/alter.txt
+	cd ../
 fi
 
 echo "***************************************************************************************"
@@ -367,6 +414,33 @@ then
 	echo -e "\e[92m[~] Installing hakcheckurl.."
 	go get -u github.com/hakluke/hakcheckurl
 else
-	echo -e "\e[92m[~] hakcheckurl already exist..skipping"
+	echo -e "\e[92m[~] Hakcheckurl already exist..skipping"
 fi
+
+if ! command -v shuffledns &> /dev/null
+then
+        echo -e "\e[92m[~] Installing shuffledns.."
+	go get -u -v github.com/projectdiscovery/shuffledns/cmd/shuffledns
+else
+        echo -e "\e[92m[~] Shuffledns already exist..skipping"
+fi
+
 echo -e "\e[92m[~] Installation completed.."
+cd /root/scripts/bounty/
+if [ -d wordlists ]
+then
+	cd wordlists/
+	if [ -f all.txt ]
+	then
+		echo -e "\e[92m[~] Jhaddix's file is already downloaded.."
+	else
+		wget https://gist.github.com/jhaddix/86a06c5dc309d08580a018c66354a056/raw/f58e82c9abfa46a932eb92edbe6b18214141439b/all.txt
+	fi
+	if [ -f subdomains.txt ]
+	then
+		echo -e "\e[92m[~] Directory file from assetnote file is already downloaded.."
+	else
+		wget https://raw.githubusercontent.com/assetnote/commonspeak2-wordlists/master/subdomains/subdomains.txt
+		cat subdomains.txt all.txt | sort -u > dns_wordlist.txt
+	fi
+fi

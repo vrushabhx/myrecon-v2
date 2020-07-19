@@ -31,6 +31,9 @@ Make sure you run install.sh with sudo privileges.
 
 Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
 
+# C tool implemented in this script
+
+`massdns`
 
 # Rust tool implemented in this script
 
@@ -83,6 +86,8 @@ findomain
 
 `hakcheckurl`
 
+`shuffledns`
+
 # Python tools Implemented in this script
 
 
@@ -107,6 +112,10 @@ findomain
 `pentest-tools`
 
 `gitGraber`
+
+`dnsvalidator`
+
+`altdns`
 
 # Features 
 added support to call specific modules
@@ -220,10 +229,12 @@ Always give an absolute path
 - [ ] Improve specific module functionality.
 - [x] Take arguments from command line for wordlist, blind-xss domain, ssrf domain.
 - [ ] May be more clear script.
-- [ ] DNS brute-Forcing.
+- [x] DNS brute-Forcing.
 - [ ] Slack and/or telegram notification.
 - [x] Request smuggling.
 - [x] Github recon.
+- [ ] Make wordlist for website.
+- [x] DNS bruteforcing using alterations.
 
 # Want-to-Contribute?
 Create a pull request for suggestions,bugs.
