@@ -703,7 +703,7 @@ helpFunction()
 
 #subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:m:s:b:w:t:" opt
+while getopts "d:h:m:s:b:w:t:f:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
@@ -712,6 +712,7 @@ do
       b ) blind="$OPTARG" ;;
       w ) wordlist="$OPTARG" ;;
       t ) token="$OPTARG" ;;
+      f ) directory="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -722,12 +723,11 @@ subdirectory="$directory"
 auto_directory(){
 subdirectory=recon-$(date +"%Y-%m-%d")
 }
+
 if [ -z "$directory" ]
 then
-        echo "helo"
         auto_directory
 else
-        echo "heello"
         user_directory
 fi
 
