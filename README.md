@@ -223,9 +223,7 @@ Two folder will be created under hackerone.com directory.
 
 Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use following command.
 
-`bash myrecon.sh -d hackerone.com -m vulnscan -b [yourdomain] -s [yourdomain] -f /root/scripts/bounty/Myrecon/hackerone.com/recon-2020-07-06`
-
-Always give an absolute path
+`bash myrecon.sh -d hackerone.com -m vulnscan -b [yourdomain] -s [yourdomain] -f recon-2020-07-06`
 
 # TO-DO
 - [ ] Make a HTML report.
