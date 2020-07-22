@@ -403,7 +403,7 @@ dirbruteforce()
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
-   cat "$domain"_unique.txt | hakcheckurl | grep -E "(403|401|200)" >> ffuf_input.txt
+   cat "$domain"_unique.txt | hakcheckurl | grep -E "(403|401|200)" | cut -d " " -f 2 >> ffuf_input.txt
    ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
    mv ffuf_input.txt ../directory/
    #touch "$domain"_gobuster.txt
