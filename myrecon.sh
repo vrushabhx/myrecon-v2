@@ -465,7 +465,7 @@ portscan()
 #   masscan -iL "$domain"_sorted_ip.txt -p0-65535 --rate 100000 --banners --source-port 61000 -v -oG "$domain"_masscan.txt
 #   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
 #   rm "$domain"_masscan.txt
-   cd /"$current"/"$domain"/"$subdirectory"/subdomains/
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
    naabu -hL subjack_input.txt -t 20 -verify -retries 4 -timeout 1000 -ports full -silent -o ../portscan/naabu_output.txt
    echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
@@ -727,21 +727,20 @@ subdirectory=recon-$(date +"%Y-%m-%d")
 if [ -z "$directory" ]
 then
         auto_directory
+	mkdir ./"$domain"
+	mkdir ./"$domain"/"$subdirectory"
+	mkdir ./"$domain"/"$subdirectory"/subdomains
+	mkdir ./"$domain"/"$subdirectory"/directory
+	mkdir ./"$domain"/"$subdirectory"/probing
+	mkdir ./"$domain"/"$subdirectory"/screenshot
+	mkdir ./"$domain"/"$subdirectory"/buckets
+	mkdir ./"$domain"/"$subdirectory"/URLs
+	mkdir ./"$domain"/"$subdirectory"/portscan
+	mkdir ./"$domain"/"$subdirectory"/vulns
+	mkdir ./"$domain"/"$subdirectory"/github_recon
 else
         user_directory
 fi
-
-mkdir ./"$domain"
-mkdir ./"$domain"/"$subdirectory"
-mkdir ./"$domain"/"$subdirectory"/subdomains
-mkdir ./"$domain"/"$subdirectory"/directory
-mkdir ./"$domain"/"$subdirectory"/probing
-mkdir ./"$domain"/"$subdirectory"/screenshot
-mkdir ./"$domain"/"$subdirectory"/buckets
-mkdir ./"$domain"/"$subdirectory"/URLs
-mkdir ./"$domain"/"$subdirectory"/portscan
-mkdir ./"$domain"/"$subdirectory"/vulns
-mkdir ./"$domain"/"$subdirectory"/github_recon
 
 clear
 if [ -z "$module" ]
