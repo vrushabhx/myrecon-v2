@@ -52,7 +52,7 @@ vulnscan()
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+  timeout 4h nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
 #XSS parameter scanning
   cd ../URLs/
   cat clean_url.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -70,7 +70,7 @@ vulnscan()
 #Hidden parameter discovery
   cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
-  python3 arjun.py --urls "$domain"_unique.txt --get -t 50 -o arjun_result.json
+  python3 arjun.py --urls "$domain"_unique.txt -t 50 -o arjun_result.json
   mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
 
 #gf-patterns and separate files with repect to vulnerabilities
@@ -96,12 +96,12 @@ vulnscan()
   fi
   cd ../URLs/
 #open-redirect
-  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf redirect | tee -a ../vulns/possible_OR.txt
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=http" | tee -a ../vulns/possible_OR.txt
   cd ../vulns/
   if [ -s possible_OR.txt ]
   then
 	echo -e "\e[92m[~] Checking for openredirect.."
-	python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 40
+	timeout 3h python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 40
 	cd openredirect/
 	grep "VULNERABLE" output >> OR_output.txt
 	rm output
@@ -116,7 +116,7 @@ vulnscan()
   if [ -s possible_lfi.txt ]
   then
 	echo -e "\e[92m[~] Checking for LFI.."
-	python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
+	timeout 3h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
 	cp -r crlf/ lfi
 	rm -r crlf
 	cd lfi/
@@ -152,7 +152,7 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-  jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  timeout 3h jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
   cd ../URLs/
   cat clean_url.txt | grep "=" | hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
   cp smuggle_input.txt /root/scripts/bounty/smuggler/
@@ -171,7 +171,7 @@ vulnscan()
 	echo -e "\e[92m[~] File with more than $d line will not be scanned.."
   fi
   cd ../pentest-tools/
-  python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
+  timeout 3h python3 smuggler.py -u ../smuggler/smuggle_input.txt -t 40
   cd smuggler/
   grep "VULNERABLE" output >> smuggler_output.txt
   rm output
@@ -183,7 +183,6 @@ vulnscan()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -191,7 +190,7 @@ spider()
 {
 # Crawl all subdomains and filter the result
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r -a -d 3
+   gospider -S "$domain"_unique.txt -o ../URLs/crawl_data/ -t 30 -c 10 -r - a -d 3
    cd ../URLs/crawl_data/
    cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "code-200" | cut -d " " -f 5 | qsreplace -a | tee -a ../spider_clean_1.txt
    cat * | grep -v -E "(.jpg|.JPG|.png|.svg|.gif|.ttf|.css|.js|.pdf|.mp4|.mp3|.woff|.eot|.jpeg|.exe|.woff2)" | grep "=" | grep "other-sources" | cut -d "-" -f 3 | tr -d " " | qsreplace -a | tee -a ../spider_clean_2.txt
@@ -202,7 +201,6 @@ spider()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -226,7 +224,6 @@ wayback()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -261,7 +258,6 @@ linkfinder()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -308,7 +304,7 @@ crlf()
    echo -e "\e[92m[~] Scanning for CRLF injection.."
    echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
    echo "*************************************************************************************************"
-   cat subjack_input.txt | interlace -threads 10 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
+   cat subjack_input.txt | timeout 3h interlace -threads 10 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
    echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
@@ -327,7 +323,6 @@ crlf()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -390,7 +385,6 @@ s3scan()
   else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -404,7 +398,7 @@ dirbruteforce()
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
    cat "$domain"_unique.txt | hakcheckurl | grep -E "(403|401|200)" | cut -d " " -f 2 >> ffuf_input.txt
-   ffuf -t 300 -c -sf -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
+   ffuf -t 300 -c -sa -fl '1,2,3,4,5,6,7,8,9,10' -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
    mv ffuf_input.txt ../directory/
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
@@ -426,7 +420,6 @@ dirbruteforce()
    else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -490,7 +483,6 @@ portscan()
    else
 	echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -575,23 +567,25 @@ subdomain()
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
    echo -e "\e[92m[~] passing file to shuffledns for active DNS resolution"
 #   echo "*****************************************************************************************"
-   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
+#   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
    cd ./"$domain"/"$subdirectory"/subdomains/
    echo -e "\e[92m[~] Bruteforcing $domain for subdomains"
    echo "*****************************************************************************************"
-   shuffledns -d "$domain" -r resolvers_used.txt -w /root/scripts/bounty/wordlists/dns_wordlist.txt -silent -o brute_shuffledns.txt
+   shuffledns -list "$domain".txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_shuffledns.txt
+   shuffledns -d "$domain" -r /root/scripts/bounty/wordlists/resolvers.txt -w /root/scripts/bounty/wordlists/dns_wordlist.txt -silent -o brute_shuffledns.txt
    echo -e "\e[92m[~] resolving domains which are found by other tools"
    echo "*****************************************************************************************"
-   shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
+#   shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
    cat resolved_shuffledns.txt | sort -u >> brute_shuffledns.txt
-   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
+#   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
 #   massdns -r /root/scripts/bounty/wordlists/resolvers.txt "$domain"_Bunique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
 #   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 | sed 's/.$//g' | sort -u > ./"$domain"/"$subdirectory"/subdomains/massdns_Balt.txt
 #   altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
-   dnsgen -w /root/scripts/bounty/wordlists/alter.txt "$domain"_Bunique.txt > dnsgen.txt
-   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
-   shuffledns -list dnsgen.txt -r resolvers_altdns.txt -silent -o resolved_altdns.txt
-   cat resolved_altdns.txt >> brute_shuffledns.txt
+   cat resolved_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_dnsgen_input.txt
+   dnsgen -w /root/scripts/bounty/wordlists/alter.txt "$domain"_dnsgen_input.txt > dnsgen.txt
+#   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
+   shuffledns -list dnsgen.txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_dnsgen.txt
+   cat resolved_dnsgen.txt >> brute_shuffledns.txt
    cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
    rm dnsgen.txt
  #  cp ./"$domain"/"$subdirectory"/subdomains/altdns.txt "$current"
@@ -619,7 +613,7 @@ subdomain()
    cd "$current"
    cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ./"$domain"/"$subdirectory"/probing/
    cd ./"$domain"/"$subdirectory"/probing/
-   cat "$domain"_Bunique.txt | httprobe -c 150 -t 20000 | tee -a "$domain"_unique.txt
+   cat "$domain"_Bunique.txt | httprobe -c 500 -t 20000 | tee -a "$domain"_unique.txt
    cp "$domain"_unique.txt ../subdomains/
    echo -e "\e[92m[~] All Host checked.."
  #  echo -e "\e[92m[~] Total online.."
@@ -689,7 +683,6 @@ subdomain()
    else
 	echo -e "\e[92m[~] $module completed results can be found in..$current/$domain/$subdirectory"
         echo "************************************************************************************"
-        exit 0
    fi
 }
 
@@ -747,6 +740,9 @@ if [ -z "$module" ]
 then
 	subdomain
 else
-	"$module"
+	echo "$module" | tr "," "\n" | while read LINE
+	do
+		"$LINE"
+	done
 fi
 

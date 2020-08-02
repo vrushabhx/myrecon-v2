@@ -120,9 +120,11 @@ findomain
 `altdns`
 
 # Features 
-added support to call specific modules
+added support to call specific modules. Multiple modules can be called using comma separated values.(e.g: -m subdomain,crlf) 
 
 date-wise folder creation to differentiate your past recon.
+
+added support to kill the freezed process automatically.
 
 # Modules included
 
@@ -227,15 +229,16 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 
 # TO-DO
 - [ ] Make a HTML report.
-- [ ] Improve specific module functionality.
+- [x] Improve specific module functionality.
 - [x] Take arguments from command line for wordlist, blind-xss domain, ssrf domain.
 - [ ] May be more clear script.
 - [x] DNS brute-Forcing.
 - [ ] Slack and/or telegram notification.
 - [x] Request smuggling.
 - [x] Github recon.
-- [ ] Make wordlist for website.
 - [x] DNS bruteforcing using alterations.
+- [x] Added support to kill the freezed process automatically
+- [x] Added support to call multiple modules
 
 # Want-to-Contribute?
 Create a pull request for suggestions,bugs.

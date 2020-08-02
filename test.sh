@@ -56,12 +56,13 @@ echo ""
 #		echo "Reachable"
 #	fi
 #done
-ff3(){
+#ff3(){
 #echo "hi"
 #echo "$wordlist"
-echo "$subdirectory"
-}
+#echo "$subdirectory"
+#}
 portscan(){
+echo "hi port"
 #echo "dalfox pipe -blind $blind "
 #echo "dalfox pipe -blind $ss "
 #echo "$subdirectory"
@@ -70,9 +71,10 @@ portscan(){
 #echo "dalfox pipe -blind $blind "
 }
 subdomain(){
-ss="$ssrf"
-portscan
-ss="$ssrf"
+echo "hi"
+#ss="$ssrf"
+#portscan
+#ss="$ssrf"
 }
 while getopts ":d:h:m:s:b:w:f:" opt
 do
@@ -125,6 +127,19 @@ subdirectory=recon-$(date +"%Y-%m-%d")
 
 
 
-report()
+#report()
+
+
+if [ -z "$module" ]
+then
+        subdomain
+else
+        echo "$module" | tr "," "\n" | while read LINE
+	do
+		"$LINE"
+	done
+	echo "$module"
+	echo "$module" | cut -d',' --output-delimiter=$'\n' -f1-
+fi
 
 
