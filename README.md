@@ -126,6 +126,8 @@ date-wise folder creation to differentiate your past recon.
 
 added support to kill the freezed process automatically.
 
+Build your own scan engine
+
 # Modules included
 
 `subdomain: Subdomain gathering + probing + screenshot`
@@ -232,7 +234,7 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 - [x] Improve specific module functionality.
 - [x] Take arguments from command line for wordlist, blind-xss domain, ssrf domain.
 - [ ] May be more clear script.
-- [x] DNS brute-Forcing.
+- [ ] DNS brute-Forcing.
 - [ ] Slack and/or telegram notification.
 - [x] Request smuggling.
 - [x] Github recon.

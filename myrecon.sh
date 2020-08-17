@@ -554,7 +554,7 @@ subdomain()
    cat ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/github_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
-#   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
+   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
 #   if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
 #   then
 #	echo -e "\e[92m[~] File compiled,sorted successfully"
@@ -565,29 +565,29 @@ subdomain()
    echo "*****************************************************************************************"
    sleep 2
 #   cp ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt "$current"
-   echo -e "\e[92m[~] passing file to shuffledns for active DNS resolution"
+ #  echo -e "\e[92m[~] passing file to shuffledns for active DNS resolution"
 #   echo "*****************************************************************************************"
 #   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 500 > ./"$domain"/"$subdirectory"/subdomains/resolvers_used.txt
-   cd ./"$domain"/"$subdirectory"/subdomains/
-   echo -e "\e[92m[~] Bruteforcing $domain for subdomains"
-   echo "*****************************************************************************************"
-   shuffledns -list "$domain".txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_shuffledns.txt
-   shuffledns -d "$domain" -r /root/scripts/bounty/wordlists/resolvers.txt -w /root/scripts/bounty/wordlists/dns_wordlist.txt -silent -o brute_shuffledns.txt
-   echo -e "\e[92m[~] resolving domains which are found by other tools"
-   echo "*****************************************************************************************"
+#   cd ./"$domain"/"$subdirectory"/subdomains/
+ #  echo -e "\e[92m[~] Bruteforcing $domain for subdomains"
+  # echo "*****************************************************************************************"
+#   shuffledns -list "$domain".txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_shuffledns.txt
+#   shuffledns -d "$domain" -r /root/scripts/bounty/wordlists/resolvers.txt -w /root/scripts/bounty/wordlists/dns_wordlist.txt -silent -o brute_shuffledns.txt
+ #  echo -e "\e[92m[~] resolving domains which are found by other tools"
+ #  echo "*****************************************************************************************"
 #   shuffledns -list "$domain".txt -r resolvers_used.txt -silent -o resolved_shuffledns.txt
-   cat resolved_shuffledns.txt | sort -u >> brute_shuffledns.txt
+ #  cat resolved_shuffledns.txt | sort -u >> brute_shuffledns.txt
 #   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
 #   massdns -r /root/scripts/bounty/wordlists/resolvers.txt "$domain"_Bunique.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns.txt
 #   cat ./"$domain"/"$subdirectory"/subdomains/massdns.txt | cut -d " " -f 1 | sed 's/.$//g' | sort -u > ./"$domain"/"$subdirectory"/subdomains/massdns_Balt.txt
 #   altdns -i "$domain"_Bunique.txt -t 100 -w /root/scripts/bounty/wordlists/alter.txt -o altdns.txt
-   cat resolved_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_dnsgen_input.txt
-   dnsgen -w /root/scripts/bounty/wordlists/alter.txt "$domain"_dnsgen_input.txt > dnsgen.txt
+ #  cat resolved_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_dnsgen_input.txt
+  # dnsgen -w /root/scripts/bounty/wordlists/alter.txt "$domain"_dnsgen_input.txt > dnsgen.txt
 #   cat /root/scripts/bounty/wordlists/resolvers.txt | sort -R | head -n 1000 > resolvers_altdns.txt
-   shuffledns -list dnsgen.txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_dnsgen.txt
-   cat resolved_dnsgen.txt >> brute_shuffledns.txt
-   cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
-   rm dnsgen.txt
+  # shuffledns -list dnsgen.txt -r /root/scripts/bounty/wordlists/resolvers.txt -silent -o resolved_dnsgen.txt
+  # cat resolved_dnsgen.txt >> brute_shuffledns.txt
+  # cat brute_shuffledns.txt | sort -u | grep "\.$domain" > "$domain"_Bunique.txt
+  # rm dnsgen.txt
  #  cp ./"$domain"/"$subdirectory"/subdomains/altdns.txt "$current"
  #  $massdns -r /root/scripts/bounty/massdns/lists/resolvers.txt altdns.txt -t A -o S -w ./"$domain"/"$subdirectory"/subdomains/massdns_altdns.txt
  #  echo -e "\e[92m[~] Compiling results in File"
