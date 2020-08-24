@@ -3,7 +3,11 @@
 clear
 
 echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium.."
-apt install nmap figlet python3-pip python2-pip chromium-browser chromium build-essential -y
+
+apt install "nmap figlet python3-pip python2-pip chromium-browser chromium build-essential make gcc make-guile unzip moreutils" -y
+sudo apt -f install
+sudo rm /var/cache/apt/archives/chromium*
+sudo apt install chromium-browser
 
 mkdir -p /root/scripts/bounty/
 cd /root/scripts/bounty/
@@ -26,7 +30,9 @@ fi
 if ! command -v amass &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find amass..Installing.."
-	apt install amass -y
+	go get -u github.com/OWASP/Amass/...
+	cd "$GOPATH"/src/github.com/OWASP/Amass/
+	go install ./...
 else
         echo -e "\e[93m[~] Skipping installation for amass.."
 fi

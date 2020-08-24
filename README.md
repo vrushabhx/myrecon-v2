@@ -1,13 +1,13 @@
-# Myrecon
+## Myrecon
 personal recon script for bug bounty
 
 
-## Modified this after a long time..
+### Modified this after a long time..
 
 Make sure you run install.sh with sudo privileges.
 
 
-# Prerequisites
+## Prerequisites
 
 
 `GO 1.13+`
@@ -26,24 +26,22 @@ Make sure you run install.sh with sudo privileges.
 
 `perl`
 
-`gf-patterns`
+`gcc`
 
 
 Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
 
 You need to give token using "-t" flag for scrapping subdomains from github. "Token without any permission"
 
-# C tool implemented in this script
+## C tool implemented in this script
 
 `massdns`
 
-# Rust tool implemented in this script
+## Rust tool implemented in this script
 
-`
-findomain
-`
+`findomain`
 
-# GO Tools Implemented in this script
+## GO Tools Implemented in this script
 
 
 `assetfinder`
@@ -90,7 +88,8 @@ findomain
 
 `shuffledns`
 
-# Python tools Implemented in this script
+
+## Python tools Implemented in this script
 
 
 `smuggler`
@@ -119,7 +118,7 @@ findomain
 
 `altdns`
 
-# Features 
+## Features 
 added support to call specific modules. Multiple modules can be called using comma separated values.(e.g: -m subdomain,crlf) 
 
 date-wise folder creation to differentiate your past recon.
@@ -128,9 +127,15 @@ added support to kill the freezed process automatically.
 
 Build your own scan engine
 
-# Modules included
+More flexibility in your command arguments.
 
-`subdomain: Subdomain gathering + probing + screenshot`
+Exclude out-of-scope subdomains. (-e blog.hackerone.com,beta.hackerone.com)
+
+Error Logging has been implemented.
+
+## Modules included
+
+`subdomain: Subdomain gathering + Exclude(if any) + probing + screenshot`
 
 `portscan: full portscan + nmap service detection on found ports`
 
@@ -150,24 +155,23 @@ Build your own scan engine
 
 `gitrecon: github recon for sensitive information disclosure`
 
+### Note
+Modules flow is necessary! you can't call vulnscan before wayback and/or spider.
 
-# Note
+### Note
 To call specific modules, you must have ran the script at least one time with succesful completion of subdomain module.
 
-# Example
+### Example
 you ran the script using following command and you notice that after s3scan script failed due to any internet connectivity and/or any other issue.
 
 `bash myrecon.sh -d hackerone.com`
 
-Now if you want you can resume from crlf --> linkfinder --> wayback --> spider --> vulnscan by using following command.(One-by-one) :(
-
-`bash myrecon.sh -d hackerone.com -m crlf`
-
-# Note 
+### Note 
 half of the vulnscan module is totally dependent on wayback and spider module.
-Only single module can be run at a time if flag has been provided.
 
-# Note
+`bash myrecon.sh -d hackerone.com -m subdomain,wayback,spider,vulnscan`
+
+### Note
 Updating Nuclei templates?
 This script is saving nuclei templates at /root/nuclei-templates/
 after running install.sh it will create a folder called "all" and will copy all templates inside that directory.
@@ -182,9 +186,9 @@ mkdir all
 cp -at ./all/ ./**/*.yaml
 ```
 
-All templates will be copied to all directory and will be used by myrecon.sh in future.
+All templates will be copied to "all" directory and will be used by myrecon.sh in future.
 
-# Installation
+## Installation
 
 Make sure $GOPATH has been set in .bashrc file and you can run go tools from anywhere. (Important)
 
@@ -196,17 +200,34 @@ Make sure $GOPATH has been set in .bashrc file and you can run go tools from any
 
 `cd ../ && mv Myrecon/ /root/scripts/bounty/ && cd /root/scripts/bounty/Myrecon/`
 
-# Updating the script
+## Updating the script
 git pull
 bash install.sh
 
-# Where-to-use
+## Where-to-use
 I recommend to use VPS as it will create a lot of traffic and will take more than 8hr to complete.
 Use my referral link to get 100$ credit on digital ocean for 60 days
 
 `https://m.do.co/c/7879a6363311`
 
-# How-to-use
+### Note
+You need to edit a Myrecon/.tokens file with github_token, wordlist, your ssrf domain, your blind xss domain.
+
+The script is flexible. Priority will be given to the command line arguments. If you don't provide command line arguments script will take values from .tokens file
+
+### .tokens file
+
+github_token=""
+
+slack_webhook=""
+
+blind_xss=""
+
+ssrf_url=""
+
+static_wordlist="/root/wordlist/dicc.txt"
+
+## How-to-use
 1) Basic scan
 
 `bash myrecon.sh -d hackerone.com -b blindxss -s ssrf -w wordlist`
@@ -215,12 +236,16 @@ Use my referral link to get 100$ credit on digital ocean for 60 days
 
 `bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist -t github_token`
 
+3) Basic scan using static values.(value will be taken from .tokens file)
+`bash myrecon.sh -d hackerone.com`
 
-## Note
+### Note
+If you want good amount of subdomains configure API for every subdomain tools. (Amass,subfinder,assetfinder,findomain)
 Use -f flag only with -m flag..
 script will create subfolder date-wise and if you want to scan specific module with the specific data you collected on certain day pass the subfolder as an argument.
+A error log file will be generated for every scan and will be stored with respect to time of scan.
 
-example:
+###example:
 you ran the script on hackerone.com on date 06/07/2020.
 you decided to scan again on 07/07/2020.
 Two folder will be created under hackerone.com directory.
@@ -229,19 +254,37 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 
 `bash myrecon.sh -d hackerone.com -m vulnscan -b [yourdomain] -s [yourdomain] -f recon-2020-07-06`
 
-# TO-DO
+## TO-DO
 - [ ] Make a HTML report.
 - [x] Improve specific module functionality.
 - [x] Take arguments from command line for wordlist, blind-xss domain, ssrf domain.
+- [X] Take arguments from file.
 - [ ] May be more clear script.
 - [ ] DNS brute-Forcing.
 - [ ] Slack and/or telegram notification.
 - [x] Request smuggling.
 - [x] Github recon.
-- [x] DNS bruteforcing using alterations.
+- [ ] DNS bruteforcing using alterations.
 - [x] Added support to kill the freezed process automatically
 - [x] Added support to call multiple modules
+- [x] Added error logging.
+- [x] Added support to exclude subdomains.
 
-# Want-to-Contribute?
+## Want-to-Contribute?
 Create a pull request for suggestions,bugs.
+
+# Disclaimer!
+* You expressly understand and agree that I shall not be liable for any damages or losses resulting from your use of this script or third-party products that multiple tools(in this script) use it.
+
+I will not be in charge of any and have/has no responsibility for any kind of:
+
+* Unlawful or illegal use of this script.
+* Legal or Law infringement (acted in any country, state, municipality, place) by third parties and users.
+* Act against ethical and / or human moral, ethic, and peoples and cultures of the world.
+* Malicious act, capable of causing damage to third parties, promoted or distributed by third parties or the user through this script.
+
+
+
+
+
 

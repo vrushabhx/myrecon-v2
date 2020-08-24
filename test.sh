@@ -1,4 +1,7 @@
 #!/bin/bash
+touch tmp.log
+exec 2>> >(ts '[%Y-%m-%d %H:%M:%S]' > tmp.log)
+source /root/scripts/personal/Myrecon/.tokens || return
 massdns=/root/scripts/bounty/massdns/bin/massdns
 #subdirectory=recon-$(date +"%Y-%m-%d")
 domain=google.com
@@ -76,19 +79,40 @@ echo "hi"
 #portscan
 #ss="$ssrf"
 }
-while getopts ":d:h:m:s:b:w:f:" opt
+while getopts ":d:h:m:s:b:w:f:e:t:" opt
 do
    case "$opt" in
+      t ) token="$OPTARG" ;;
       d ) domain="$OPTARG" ;;
       m ) module="$OPTARG" ;;
       s ) ssrf="$OPTARG" ;;
       b ) blind="$OPTARG" ;;
       w ) wordlist="$OPTARG" ;;
       f ) directory="$OPTARG" ;;
+      e ) excluded="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
+parse_wordlist()
+{
+#wordlist="$static_wordlist"
+echo "I'm $token"
+}
+echo "$wordlist"
 
+if [ -z "$wordlist" ]
+then
+	wordlist="$static_wordlist"
+#	parse_wordlist
+fi
+echo "$wordlist"
+echo "$token"
+if [ -z "$token" ]
+then
+	token="$github_token"
+fi
+echo "$token"
+parse_wordlist
 #echo "$domain"
 #echo "$module"
 #if [ -z "$module" ]
@@ -124,7 +148,12 @@ subdirectory=recon-$(date +"%Y-%m-%d")
 #portscan
 #rm -v !("README.md")
 
-
+exclude()
+{
+ echo "${excluded[*]}"
+ echo "${excluded[*]}" | cut -d',' --output-delimiter=$'\n' -f1- | tee -a excluded.txt
+ grep -vFf excluded.txt alld.txt >> Bunique.txt
+}
 
 
 #report()
@@ -142,4 +171,13 @@ else
 	echo "$module" | cut -d',' --output-delimiter=$'\n' -f1-
 fi
 
+cat abcasdasdwe.txt
+#cat OR_payloads.txt
+user_directory
+mv tmp.log /root/scripts/personal/Myrecon/test/recon/"$subdirectory".log
 
+echo "$blind_xss"
+echo "$github_token"
+echo "$ssrf"
+
+exclude

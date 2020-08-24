@@ -1,17 +1,29 @@
 #!/bin/bash
 #clear
+touch tmp.log
+exec 2>> >(ts '[%Y-%m-%d %H:%M:%S]' > tmp.log)
+current=`pwd`
+source "$current"/.tokens || return
 banner=`figlet -f slant myrecon`    #without banner there is no script
 echo -e "\e[93;1m${banner}" 
 echo -e "			\e[31;1m A script by Shubham Chaskar"
 
 echo " "
-current=`pwd`
 #massdns=/root/scripts/bounty/massdns/bin/massdns
 #altdns=/root/scripts/bounty/altdns/altdns.py
 #ifconfig wlan0 down
 #IP=`ifconfig wlan1 | grep "inet " | cut -d ' ' -f 10`
 
 
+exclude()
+{
+   cd "$current"/"$domain"/"$subdirectory"/subdomains/
+   echo -e "\e[92m[~] Excluding domains.."
+   echo "${excluded[*]}" | cut -d',' --output-delimiter=$'\n' -f1- | tee -a "$domain"_excluded.txt
+   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > tmp_Bunique.txt
+   grep -vFf "$domain"_excluded.txt tmp_Bunique.txt > Bunique.txt
+   rm tmp_Bunique.txt
+}
 gitrecon()
 {
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
@@ -142,7 +154,7 @@ vulnscan()
         echo -e "\e[92m[~] File found with content.."
 	if [ "$sql" -gt "$b" ]
 	then
-		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
+		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --risk 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
 	else
 		echo -e "\e[92m[~] File with more than $b line will not be scanned.."
 	fi
@@ -154,7 +166,7 @@ vulnscan()
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
   timeout 3h jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
   cd ../URLs/
-  cat clean_url.txt | grep "=" | hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
+  cat clean_url.txt | grep "=" | timeout 1h hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
   cp smuggle_input.txt /root/scripts/bounty/smuggler/
   cd /root/scripts/bounty/smuggler/
   smg=200
@@ -397,8 +409,8 @@ dirbruteforce()
    echo -e "\e[92m[~] FFUF will be in action.."
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
-   cat "$domain"_unique.txt | hakcheckurl | grep -E "(403|401|200)" | cut -d " " -f 2 >> ffuf_input.txt
-   ffuf -t 300 -c -sa -fl '1,2,3,4,5,6,7,8,9,10' -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
+   cat "$domain"_unique.txt | timeout 1h hakcheckurl | grep -E "(403|200)" | cut -d " " -f 2 >> ffuf_input.txt
+   ffuf -H "X-Forwarded-For: 127.0.0.1" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0" -ac -t 300 -c -sa -fl '1,2,3,4,5,6,7,8,9,10' -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
    mv ffuf_input.txt ../directory/
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
@@ -537,7 +549,7 @@ subdomain()
    echo "*****************************************************************************************"
    echo -e "\e[93m[~] findomain and subfinder in work.. scan will start in a second.."
    sleep 1
-   subfinder -d "$domain" -t 30 -o subfinder_result.txt
+   subfinder -all -d "$domain" -t 50 -o subfinder_result.txt
    findomain -t "$domain" -o
    cp "$domain".txt findomain_result.txt
    rm "$domain".txt
@@ -554,7 +566,12 @@ subdomain()
    cat ./"$domain"/"$subdirectory"/subdomains/findomain_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/subfinder_result.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
    cat ./"$domain"/"$subdirectory"/subdomains/github_domains.txt >> ./"$domain"/"$subdirectory"/subdomains/"$domain".txt
-   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
+   if [ -z "$excluded" ]
+   then
+	cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt
+   else
+	exclude
+   fi
 #   if [ -e ./"$domain"/"$subdirectory"/subdomains/"$domain"_Bunique.txt ]
 #   then
 #	echo -e "\e[92m[~] File compiled,sorted successfully"
@@ -696,7 +713,7 @@ helpFunction()
 
 #subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:m:s:b:w:t:f:" opt
+while getopts "d:h:m:s:b:w:t:f:e:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
@@ -706,10 +723,30 @@ do
       w ) wordlist="$OPTARG" ;;
       t ) token="$OPTARG" ;;
       f ) directory="$OPTARG" ;;
+      e ) excluded="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
 
+if [ -z "$ssrf" ]
+then
+	ssrf="$ssrf_url"
+fi
+
+if [ -z "$blind" ]
+then
+	blind="$blind_xss"
+fi
+
+if [ -z "$wordlist" ]
+then
+	wordlist="$static_wordlist"
+fi
+
+if [ -z "$token" ]
+then
+	token="$github_token"
+fi
 user_directory(){
 subdirectory="$directory"
 }
@@ -740,9 +777,11 @@ if [ -z "$module" ]
 then
 	subdomain
 else
-	echo "$module" | tr "," "\n" | while read LINE
+	echo "$module" | tr "," "\n" | while read LINE				#not using array because IFS work differently for all shells
 	do
 		"$LINE"
 	done
 fi
 
+cd "$current"
+mv tmp.log "$current"/"$domain"/"$subdirectory"/"$subdirectory".log
