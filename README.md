@@ -119,19 +119,20 @@ You need to give token using "-t" flag for scrapping subdomains from github. "To
 `altdns`
 
 ## Features 
-added support to call specific modules. Multiple modules can be called using comma separated values.(e.g: -m subdomain,crlf) 
 
-date-wise folder creation to differentiate your past recon.
+* added support to call specific modules. Multiple modules can be called using comma separated values.(e.g: -m subdomain,crlf) 
 
-added support to kill the freezed process automatically.
+* date-wise folder creation to differentiate your past recon.
 
-Build your own scan engine
+* added support to kill the freezed process automatically.
 
-More flexibility in your command arguments.
+* Build your own scan engine
 
-Exclude out-of-scope subdomains. (-e blog.hackerone.com,beta.hackerone.com)
+* More flexibility in your command arguments.
 
-Error Logging has been implemented.
+* Exclude out-of-scope subdomains. (-e blog.hackerone.com,beta.hackerone.com)
+
+* Error Logging has been implemented.
 
 ## Modules included
 
@@ -165,6 +166,10 @@ To call specific modules, you must have ran the script at least one time with su
 you ran the script using following command and you notice that after s3scan script failed due to any internet connectivity and/or any other issue.
 
 `bash myrecon.sh -d hackerone.com`
+
+Now You can continue where you left of by following command
+
+`bash myrecon.sh -d hackerone.com -f recon-2020-07-06 -m crlf,linkfinder,wayback,vulnscan`
 
 ### Note 
 half of the vulnscan module is totally dependent on wayback and spider module.
@@ -202,6 +207,7 @@ Make sure $GOPATH has been set in .bashrc file and you can run go tools from any
 
 ## Updating the script
 git pull
+
 bash install.sh
 
 ## Where-to-use
@@ -237,6 +243,7 @@ static_wordlist="/root/wordlist/dicc.txt"
 `bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist -t github_token`
 
 3) Basic scan using static values.(value will be taken from .tokens file)
+
 `bash myrecon.sh -d hackerone.com`
 
 ### Note
@@ -245,7 +252,7 @@ Use -f flag only with -m flag..
 script will create subfolder date-wise and if you want to scan specific module with the specific data you collected on certain day pass the subfolder as an argument.
 A error log file will be generated for every scan and will be stored with respect to time of scan.
 
-###example:
+### example:
 you ran the script on hackerone.com on date 06/07/2020.
 you decided to scan again on 07/07/2020.
 Two folder will be created under hackerone.com directory.

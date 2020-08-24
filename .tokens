@@ -1,5 +1,5 @@
-github_token="123123123123h123123123123"
+github_token=""
 slack_webhook=""
-blind_xss="123123123"
+blind_xss=""
 ssrf_url=""
-static_wordlist="/root/wordlist/dicc.txt"
+static_wordlist=""
