@@ -4,8 +4,9 @@ clear
 
 echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium.."
 
-apt install nmap figlet python3-pip python-pip unzip moreutils jq build-essential make gcc make-guile -y
+sudo apt-get install make make-guile -y
 sudo apt -f install
+sudo apt install unzip nmap figlet python3-pip python-pip jq unzip build-essential moreutils gcc -y
 sudo rm /var/cache/apt/archives/chromium*
 sudo apt install chromium-browser -y
 
