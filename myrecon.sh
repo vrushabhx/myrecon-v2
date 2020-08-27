@@ -20,8 +20,8 @@ exclude()
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
    echo -e "\e[92m[~] Excluding domains.."
    echo "${excluded[*]}" | cut -d',' --output-delimiter=$'\n' -f1- | tee -a "$domain"_excluded.txt
-   cat ./"$domain"/"$subdirectory"/subdomains/"$domain".txt | sort -u | grep "\.$domain" > tmp_Bunique.txt
-   grep -vFf "$domain"_excluded.txt tmp_Bunique.txt > Bunique.txt
+   cat "$domain".txt | sort -u | grep "\.$domain" > tmp_Bunique.txt
+   grep -vFf "$domain"_excluded.txt tmp_Bunique.txt > "$domain"_Bunique.txt
    rm tmp_Bunique.txt
 }
 gitrecon()
