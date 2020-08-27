@@ -237,7 +237,7 @@ static_wordlist="/root/wordlist/dicc.txt"
 ## How-to-use
 1) Basic scan
 
-`bash myrecon.sh -d hackerone.com -b blindxss -s ssrf -w wordlist`
+`bash myrecon.sh -d hackerone.com -b blindxss -s ssrf -w wordlist -e blog.hackerone.com`
 
 2) Using module
 
