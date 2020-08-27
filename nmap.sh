@@ -34,6 +34,6 @@ ports=`cat $PORTSFILE | tr '\n' ','`
 echo "Running nmap service scan on found results."
 echo "Executing nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV"
 
-cat "$TARGETSFILE" | timeout 2h interlace -c "nmap _target_ -p ${ports:0:-1} -sV" -threads 20 -v | tee -a ../portscan/nmap_result.txt
-cat ../portscan/nmap_result.txt | grep -vE "(SF:|SF-P|NEXT SERVICE FINGERPRINT|[THREAD])" > ../portscan/nmap_result_filtered.txt
+cat "$TARGETSFILE" | timeout 2h interlace -c "nmap _target_ -p ${ports:0:-1} -sV" -threads 10 -v | tee -a ../portscan/nmap_result.txt
+cat ../portscan/nmap_result.txt | grep -vE "(SF:|SF-P|NEXT SERVICE FINGERPRINT|[THREAD]|unrecognized|scanned|closed|filtered|incorrect|==|commands|Interlace|Sajeeb)" > ../portscan/nmap_result_filtered.txt
 rm ../portscan/nmap_result.txt

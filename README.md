@@ -10,113 +10,114 @@ Make sure you run install.sh with sudo privileges.
 ## Prerequisites
 
 
-`GO 1.13+`
+* GO 1.13+
 
-`Python3.6 +`
+* Python3.6 +
 
-`python2.7`
+* python2.7
 
-`pip2`
+* pip2
 
-`pip3`
+* pip3
 
-`rust`
+* rust
 
-`make`
+* make
 
-`perl`
+* perl
 
-`gcc`
+* gcc
 
 
 Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
 
-You need to give token using "-t" flag for scrapping subdomains from github. "Token without any permission"
+You need to give token using "-t" flag for scrapping subdomains from github. "Token without any permission" and/or configure your token in .tokens file.
 
 ## C tool implemented in this script
 
-`massdns`
+* massdns
 
 ## Rust tool implemented in this script
 
-`findomain`
+* findomain
 
 ## GO Tools Implemented in this script
 
 
-`assetfinder`
+* assetfinder
 
-`subfinder`
+* subfinder
 
-`amass`
+* amass
 
-`httprobe`
+* httprobe
 
-`aquatone`
+* aquatone
 
-`subjack`
+* subjack
 
-`Subover`
+* Subover
 
-`tko-subs`
+* tko-subs
 
-`naabu`
+* naabu
 
-`ffuf`
+* ffuf
 
-`Waybackurl`
+* Waybackurl
 
-`gau`
+* gau
 
-`gospider`
+* gospider
 
-`jaeles`
+* jaeles
 
-`nuclei`
+* nuclei
 
-`kxss`
+* kxss
 
-`dalfox`
+* dalfox
 
-`gf`
+* gf
 
-`qsreplace`
+* qsreplace
 
-`unfurl`
+* unfurl
 
-`hakcheckurl`
+* hakcheckurl
 
-`shuffledns`
+* shuffledns
 
+* Slackcat
 
 ## Python tools Implemented in this script
 
 
-`smuggler`
+* smuggler
 
-`github-subdomains.py`
+* github-subdomains.py
 
-`interlace`
+* interlace
 
-`cloud_enum`
+* cloud_enum
 
-`CRLF-Injection-Scanner`
+* CRLF-Injection-Scanner
 
-`Linkfinder`
+* Linkfinder
 
-`Arjun`
+* Arjun
 
-`tplmap`
+* tplmap
 
-`sqlmap from github`
+* sqlmap from github
 
-`pentest-tools`
+* pentest-tools
 
-`gitGraber`
+* gitGraber
 
-`dnsvalidator`
+* dnsvalidator
 
-`altdns`
+* altdns
 
 ## Features 
 
@@ -136,25 +137,25 @@ You need to give token using "-t" flag for scrapping subdomains from github. "To
 
 ## Modules included
 
-`subdomain: Subdomain gathering + Exclude(if any) + probing + screenshot`
+* subdomain: Subdomain gathering + Exclude(if any) + probing + screenshot
 
-`portscan: full portscan + nmap service detection on found ports`
+* portscan: full portscan + nmap service detection on found ports
 
-`dirbruteforce: directory bruteforce`
+* dirbruteforce: directory bruteforce
 
-`s3scan: scan buckets`
+* s3scan: scan buckets
 
-`crlf: srlf injection scanner`
+* crlf: srlf injection scanner
 
-`linkfinder: finding js files and endpoints`
+* linkfinder: finding js files and endpoints
 
-`wayback: getting all URLs from wayback machine`
+* wayback: getting all URLs from wayback machine
 
-`spider: crawl and filter all data`
+* spider: crawl and filter all data
 
-`vulnscan: sql, xss, CVE scanning`
+* vulnscan: sql, xss, CVE scanning
 
-`gitrecon: github recon for sensitive information disclosure`
+* gitrecon: github recon for sensitive information disclosure
 
 ### Note
 Modules flow is necessary! you can't call vulnscan before wayback and/or spider.
@@ -197,18 +198,18 @@ All templates will be copied to "all" directory and will be used by myrecon.sh i
 
 Make sure $GOPATH has been set in .bashrc file and you can run go tools from anywhere. (Important)
 
-`git clone https://github.com/unstabl3/Myrecon.git`
-
-`cd Myrecon/`
-
-`bash install.sh`
-
-`cd ../ && mv Myrecon/ /root/scripts/bounty/ && cd /root/scripts/bounty/Myrecon/`
-
-## Updating the script
-git pull
-
+```
+git clone https://github.com/unstabl3/Myrecon.git
+cd Myrecon/
 bash install.sh
+cd ../ && mv Myrecon/ /root/scripts/bounty/ && cd /root/scripts/bounty/Myrecon/
+## Updating the script
+```
+
+```
+git pull
+bash install.sh
+```
 
 ## Where-to-use
 I recommend to use VPS as it will create a lot of traffic and will take more than 8hr to complete.
@@ -251,6 +252,7 @@ If you want good amount of subdomains configure API for every subdomain tools. (
 Use -f flag only with -m flag..
 script will create subfolder date-wise and if you want to scan specific module with the specific data you collected on certain day pass the subfolder as an argument.
 A error log file will be generated for every scan and will be stored with respect to time of scan.
+Configure gitgrabber properly to get github recon result!
 
 ### example:
 you ran the script on hackerone.com on date 06/07/2020.
@@ -261,6 +263,33 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 
 `bash myrecon.sh -d hackerone.com -m vulnscan -b [yourdomain] -s [yourdomain] -f recon-2020-07-06`
 
+or if you have .tokens properly configured
+
+`bash myrecon.sh -d hackerone.com -m vulnscan -f recon-2020-07-06`
+
+
+## Slacking
+
+Notifications will be send to slack using "Slackcat" tool! You need to create Slack channel in your workspace and enable incoming webhook! Copy the webhook and save it in the .tokens file.
+If you wish you can give webhook as a command-line argument using "-n" flag.
+
+The following recon data will be sent to your slack channel!
+
+* Portscan.
+* Both open and protected S3 buckets.
+* Both open and proteceted google buckets.
+* Both open and protected azure blobs.
+* Nuclei Results.
+* jaeles result.
+* Possible XSS.
+* Possible SSTI.
+* Possible SQLi.
+* Possible Open Redirect.
+* Possible LFI.
+* Possible HTTP request smuggling.
+
+Remaining modules data will be sent if and only if filteration of a output is possible.
+
 ## TO-DO
 - [ ] Make a HTML report.
 - [x] Improve specific module functionality.
@@ -268,7 +297,7 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 - [X] Take arguments from file.
 - [ ] May be more clear script.
 - [ ] DNS brute-Forcing.
-- [ ] Slack and/or telegram notification.
+- [x] Slack and/or telegram notification.
 - [x] Request smuggling.
 - [x] Github recon.
 - [ ] DNS bruteforcing using alterations.
@@ -276,6 +305,7 @@ Now you want to scan for vulnerabilities on data you collected on 06/07/2020 use
 - [x] Added support to call multiple modules
 - [x] Added error logging.
 - [x] Added support to exclude subdomains.
+- [ ] Compare results with previous scan and send only new data to slack.
 
 ## Want-to-Contribute?
 Create a pull request for suggestions,bugs.

@@ -24,6 +24,7 @@ then
 	cargo build --release
 	cp ./target/release/findomain /usr/local/bin/findomain
 	cd ../
+	echo -e "\e[93m[~] Configure API keys for better result.."
 else
         echo -e "\e[93m[~] Skipping installation for findomain.."
 fi
@@ -34,6 +35,7 @@ then
 	go get -u github.com/OWASP/Amass/...
 	cd "$GOPATH"/src/github.com/OWASP/Amass/
 	go install ./...
+	echo -e "\e[93m[~] Configure API keys for better result.."
 else
         echo -e "\e[93m[~] Skipping installation for amass.."
 fi
@@ -68,6 +70,7 @@ else
 	pip3 install -r requirements3.txt
 	pip2 install -r requirements2.txt
 	cd ../
+	echo -e "\e[93m[~] Configure github_token in .tokens.."
 fi
 
 if [ -d Interlace ]
@@ -90,7 +93,7 @@ else
 	echo -e "\e[92m[~] Installing cloud_enum.."
 	git clone https://github.com/initstring/cloud_enum.git
 	cd cloud_enum/
-	pip3 install -r ./requirements.txt
+	pip3 install -r requirements.txt
 	wget https://raw.githubusercontent.com/RhinoSecurityLabs/GCPBucketBrute/master/permutations.txt
 	cp permutations.txt all.txt
 	cd ../
@@ -178,7 +181,7 @@ else
 	pip3 install -r requirements.txt
 	cd wordlists/
 	cat * > all_keywords.txt
-	echo -e "\e[92m[~] Edit config.py with github and slcak tokens.."
+	echo -e "\e[93m[~] Edit config.py with github and slcak tokens.."
 fi
 cd /root/scripts/bounty/
 
@@ -446,7 +449,15 @@ else
         echo -e "\e[92m[~] Shuffledns already exist..skipping"
 fi
 
-echo -e "\e[92m[~] Installation completed.."
+if ! command -v slackcat &> /dev/null
+then
+        echo -e "\e[92m[~] Installing Slackcat.."
+        go get -u -v github.com/dwisiswant0/slackcat
+else
+        echo -e "\e[92m[~] Slackcat already exist..skipping"
+	echo -e "\e[93m[~] Configure slack_webhook in .tokens.."
+fi
+
 cd /root/scripts/bounty/
 if [ -d wordlists ]
 then
@@ -465,3 +476,4 @@ then
 		cat subdomains.txt all.txt | sort -u > dns_wordlist.txt
 	fi
 fi
+echo -e "\e[92m[~] Installation completed.."

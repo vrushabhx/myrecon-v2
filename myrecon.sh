@@ -31,9 +31,13 @@ gitrecon()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] gitgraber will be in action.."
    cd /root/scripts/bounty/gitGraber/
-   python3 gitGraber.py -k ./wordlists/all_keywords.txt -q "$domain" -s | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
+   python3 gitGraber.py -k ./wordlists/all_keywords.txt -q "$domain" | tee -a "$current"/"$domain"/"$subdirectory"/github_recon/gitgraber_result.txt
    cd "$current"/"$domain"/"$subdirectory"/github_recon/
    cat gitgraber_result.txt | grep -E "(TOKEN FOUND|Token :|RAW URL :|Repository URL :)" >> github_tokens_found.txt
+   echo -e "\e[92m[~]  Sending result to slack.."
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Github recon result start*"}' "$notify" 2>1
+   cat github_tokens_found.txt | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Github recon result end*"}' "$notify" 2>1
    cd "$current"
  #  ./main -save "$domain"_gitrob -threads 100 "$git"
  #  cp "$domain"_gitrob "$current"/"$domain"/"$subdirectory"/
@@ -65,6 +69,10 @@ vulnscan()
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
   timeout 4h nuclei -c 200 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result start*"}' "$notify" 2>1
+  cat ../vulns/nuclei_result.txt | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result end*"}' "$notify" 2>1
 #XSS parameter scanning
   cd ../URLs/
   cat clean_url.txt | kxss | tee -a ../vulns/xss_reflection_kxss.txt
@@ -75,6 +83,11 @@ vulnscan()
   then
 	cat xss_reflection_kxss.txt | cut -d " " -f 9 > dalfox_input.txt
 	cat dalfox_input.txt | dalfox pipe -blind "$blind" -o ../vulns/dalfox_result.txt -w 30
+	echo -e "\e[92m[~] Sending data to slack.."
+        curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible XSS result start*"}' "$notify" 2>1
+        cat dalfox_result.txt | grep "\[V\]" | slackcat -u "$notify"
+        curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Also check dalfox_result for more possibilities*"}' "$notify" 2>1
+        curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible XSS result end*"}' "$notify" 2>1
   else
 	echo -e "\e[92m[~] No reflections has been found.."
   fi
@@ -106,6 +119,10 @@ vulnscan()
 		echo $line && python /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
   	done
   fi
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SSTI result start*"}' "$notify" 2>1
+  cat ssti_tpl_result.txt | grep -E "(ok|identified|parameter:)" | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SSTI result end*"}' "$notify" 2>1
   cd ../URLs/
 #open-redirect
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=http" | tee -a ../vulns/possible_OR.txt
@@ -117,6 +134,10 @@ vulnscan()
 	cd openredirect/
 	grep "VULNERABLE" output >> OR_output.txt
 	rm output
+        echo -e "\e[92m[~] Sending data to slack.."
+	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible OR result start*"}' "$notify" 2>1
+	cat OR_output.txt | slackcat -u "$notify"
+	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible OR result end*"}' "$notify" 2>1
 	cd ../
   else
 	echo -e "\e[92m[~] No patterns found.."
@@ -129,10 +150,11 @@ vulnscan()
   then
 	echo -e "\e[92m[~] Checking for LFI.."
 	timeout 3h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
-	cp -r crlf/ lfi
-	rm -r crlf
 	cd lfi/
 	grep "VULNERABLE" output >> lfi_output.txt
+	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible LFI result start*"}' "$notify" 2>1
+	cat lfi_output.txt | slackcat -u "$notify"
+	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible LFI result end*"}' "$notify" 2>1
 	rm output
 	cd ../
 
@@ -146,6 +168,7 @@ vulnscan()
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf sqli | tee -a ../vulns/possible_sqli.txt
   cd ../vulns/
   mkdir sql_result
+  mkdir sql_result_heuristic
   mkdir POC
   sql=200
   b=`cat possible_sqli.txt | wc -l`
@@ -161,10 +184,28 @@ vulnscan()
   else
         echo -e "\e[92m[~] No patterns found for sqli.."
   fi
+  echo -e "\e[92m[~] Scanning all Urls for potential SQL injection.."
+  echo "**********************************************************************************************"
+  echo -e "\e[92m[~] If and only if basic tests shows possiblitiy.."
+  echo "**********************************************************************************************"
+  cd ../URLs/
+  cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | qsreplace -a | tee -a ../vulns/heuristic_input.txt
+  cd ../vulns/
+  cp heuristic_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m heuristic_input.txt --threads 10 --batch --random-agent --level 5 --risk 3 --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
+  rm /root/scripts/bounty/sqlmap-dev/heuristic_input.txt /root/scripts/bounty/sqlmap-dev/possible_sqli.txt
+  echo "**********************************************************************************************"
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SQLi result start*"}' "$notify" 2>1
+  find "$current"/"$domain"/"$subdirectory"/ -name "log" -exec cat {} \; | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SQLi result end*"}' "$notify" 2>1
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
   timeout 3h jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Jaeles scanner result start*"}' "$notify" 2>1
+  cat ../vulns/jaeles_result/vuln-summary.txt | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Jaeles scanner result end*"}' "$notify" 2>1
   cd ../URLs/
   cat clean_url.txt | grep "=" | timeout 1h hakcheckurl | grep "200" | cut -d " " -f 2 | tee -a smuggle_input.txt
   cp smuggle_input.txt /root/scripts/bounty/smuggler/
@@ -174,11 +215,11 @@ vulnscan()
   if [ "$smg" -gt "$d" ]
   then
 	cat smuggle_input.txt | python3 smuggler.py -x -q -l smuggler_output_defparam.txt -c exhaustive.py
-	mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/
+	mv smuggler_output_defparam.txt "$current"/"$domain"/"$subdirectory"/vulns/POC/
 	cp -r payloads/ "$current"/"$domain"/"$subdirectory"/vulns/POC/
 	cd payloads/
-	find . ! -name 'README.md' -type f -exec rm -f {} +
-	find . ! -name 'README.md' -type d -exec rm -r {} +
+	find . ! -name 'README.md' -type f -exec rm -rf {} +
+	find . ! -name 'README.md' -type d -exec rm -rf {} +
   else
 	echo -e "\e[92m[~] File with more than $d line will not be scanned.."
   fi
@@ -187,8 +228,13 @@ vulnscan()
   cd smuggler/
   grep "VULNERABLE" output >> smuggler_output.txt
   rm output
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible HTTP smuggling result start*"}' "$notify" 2>1
+  cat smuggler_output.txt | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible HTTP smuggling result end*"}' "$notify" 2>1
   cd ../
   mv smuggler/ "$current"/"$domain"/"$subdirectory"/vulns/
+  rm /root/scripts/bounty/smuggler/smuggle_input.txt
   if [ -z "$module" ]
    then
 	gitrecon
@@ -370,6 +416,16 @@ s3scan()
    python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
    python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
    python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
+   echo -e "\e[92m[~] Sending data to slack.."
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*S3 result start*"}' "$notify" 2>1
+   cat "$domain"_s3_bucket.txt | grep -vE "(FILES|->)" | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*S3 result end*"}' "$notify" 2>1
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*gcp result start*"}' "$notify" 2>1
+   cat "$domain"_gcp_bucket.txt | grep -vE "(FILES|->)" | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*gcp result end*"}' "$notify" 2>1
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*azure result start*"}' "$notify" 2>1
+   cat "$domain"_azure.txt | grep -vE "(FILES|->)" | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*azure result end*"}' "$notify" 2>1
    cp "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt "$current"/"$domain"/"$subdirectory"/buckets/
    rm "$domain"_s3_bucket.txt "$domain"_gcp_bucket.txt "$domain"_azure.txt
    echo "***************************************************************************************"
@@ -471,7 +527,7 @@ portscan()
 #   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
 #   rm "$domain"_masscan.txt
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   naabu -hL subjack_input.txt -t 20 -verify -retries 4 -timeout 1000 -ports full -silent -o ../portscan/naabu_output.txt
+   naabu -hL subjack_input.txt -rate 100 -verify -retries 4 -timeout 1000 -ports full -silent -o ../portscan/naabu_output.txt
    echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
@@ -487,6 +543,10 @@ portscan()
 #   done
    echo -e "\e[92m[~] NMAP service detection completed.."
    echo "**********************************************************************************"
+   echo -e "\e[92m[~] Sending Portscan result to slack.."
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Portscan result start*"}' "$notify" 2>1
+   cat ../portscan/nmap_result_filtered.txt | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Portscan result end*"}' "$notify" 2>1
    mv naabu_output_ports.txt ../portscan/
    mv naabu_output_targets.txt ../portscan/
    if [ -z "$module" ]
@@ -661,8 +721,12 @@ subdomain()
    echo "*****************************************************************************************"
    sed -e 's/https:\/\///g; s/http:\/\///g' "$domain"_unique.txt | sort -u >> subjack_input.txt
    sleep 2
-   subjack -m -t 50 -timeout 20 -v -w subjack_input.txt -o ../subdomains/subjack_result.txt
+   subjack -m -t 50 -timeout 20 -v -w subjack_input.txt -o subjack_result.txt
    echo -e "\e[92m[~] subjack completed his task.."
+   echo -e "\e[92m[~] Sending Takeover result to the slack.."
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result start*"}' "$notify" 2>1
+   cat subjack_result.txt | grep -v "Vulnerable" | slackcat -u "$notify"
+   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result end*"}' "$notify" 2>1
    echo "*****************************************************************************************"
 #   cd -
    echo -e "\e[92m[~] Subover is in action..."
@@ -713,7 +777,7 @@ helpFunction()
 
 #subdirectory=recon-$(date +"%Y-%m")
 
-while getopts "d:h:m:s:b:w:t:f:e:" opt
+while getopts "d:h:m:s:b:w:t:f:e:n:" opt
 do
    case "$opt" in
       d ) domain="$OPTARG" ;;
@@ -724,6 +788,7 @@ do
       t ) token="$OPTARG" ;;
       f ) directory="$OPTARG" ;;
       e ) excluded="$OPTARG" ;;
+      n ) notify="$OPTARG" ;;
       ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
    esac
 done
@@ -747,6 +812,12 @@ if [ -z "$token" ]
 then
 	token="$github_token"
 fi
+
+if [ -z "$notify" ]
+then
+	notify="$slack_webhook"
+fi
+
 user_directory(){
 subdirectory="$directory"
 }
