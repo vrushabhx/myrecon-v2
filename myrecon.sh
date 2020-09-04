@@ -95,15 +95,18 @@ vulnscan()
 #Hidden parameter discovery
   cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
-  python3 arjun.py --urls "$domain"_unique.txt -t 50 -o arjun_result.json
+  cat "$domain"_unique.txt | timeout 1h hakcheckurl | grep -E "(404|200)" | cut -d " " -f 2 >> arjun_input.txt
+  python3 arjun.py --urls arjun_input.txt -t 50 -o arjun_result.json
+  mv arjun_input.txt "$current"/"$domain"/"$subdirectory"/URLs/
   mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
+  rm arjun_input.txt "$domain"_unique.txt
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
-  ss="$ssrf"            #ssrftest.com or ngrok or burp private collaborator
+  ss="$ssrf"            #ssrftest.com or ngrok or burp private collaborator or canary token
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
-  cat ../vulns/possible_ssrf.txt | sed "s|$|\&dest=$ss\&redirect=$ss\&uri=$ss\&path=$ss\&continue=$ss\&url=$ss\&window=$ss\&next=$ss\&data=$ss\&reference=$ss\&site=$ss\&html=$ss\&val=$ss\&validate=$ss\&domain=$ss\&callback=$ss\&return=$ss\&page=$ss\&feed=$ss\&host=$ss&\port=$ss\&to=$ss\&out=$ss\&view=$ss\&dir=$ss\&show=$ss\&navigation=$ss\&open=$ss|g" | tee -a ../vulns/possible_ssrf_2.txt
+  cat ../vulns/possible_ssrf.txt | qsreplace "http://ssrftest.com/x/kVTj1" | tee -a ../vulns/possible_ssrf_2.txt
   ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100 -of html -o ../vulns/ssrf_2_result_ffuf.html
 #IDOR
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
@@ -121,7 +124,10 @@ vulnscan()
   fi
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SSTI result start*"}' "$notify" 2>1
-  cat ssti_tpl_result.txt | grep -E "(ok|identified|parameter:)" | slackcat -u "$notify"
+  if [ -f ssti_tpl_result.txt ]
+  then
+	 cat ssti_tpl_result.txt | grep -E "(ok|identified|parameter:)" | slackcat -u "$notify"
+  fi
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SSTI result end*"}' "$notify" 2>1
   cd ../URLs/
 #open-redirect
@@ -170,7 +176,8 @@ vulnscan()
   mkdir sql_result
   mkdir sql_result_heuristic
   mkdir POC
-  sql=200
+  sql=300
+  sql_hr=2000
   b=`cat possible_sqli.txt | wc -l`
   if [ -s possible_sqli.txt ]
   then
@@ -191,7 +198,19 @@ vulnscan()
   cd ../URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | qsreplace -a | tee -a ../vulns/heuristic_input.txt
   cd ../vulns/
-  cp heuristic_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m heuristic_input.txt --threads 10 --batch --random-agent --level 5 --risk 3 --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
+  tt=`cat heuristic_input.txt | wc -l`
+  if [ -s heuristic_input.txt ]
+  then
+        echo -e "\e[92m[~] File found with content.."
+	if [ "$sql_hr" -gt "$tt" ]
+	then
+		cp heuristic_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m heuristic_input.txt --batch --random-agent --level 5 --risk 3 --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
+	else
+		echo -e "\e[92m[~] File with more than $b line will not be scanned.."
+	fi
+  else
+	echo -e "\e[92m[~] No patterns found for sqli.."
+  fi
   rm /root/scripts/bounty/sqlmap-dev/heuristic_input.txt /root/scripts/bounty/sqlmap-dev/possible_sqli.txt
   echo "**********************************************************************************************"
   echo -e "\e[92m[~] Sending data to slack.."
@@ -201,7 +220,7 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-  timeout 3h jaeles scan -U "$domain"_unique.txt -c 50 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  timeout 4h jaeles scan -U "$domain"_unique.txt -c 100 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Jaeles scanner result start*"}' "$notify" 2>1
   cat ../vulns/jaeles_result/vuln-summary.txt | slackcat -u "$notify"
@@ -220,6 +239,7 @@ vulnscan()
 	cd payloads/
 	find . ! -name 'README.md' -type f -exec rm -rf {} +
 	find . ! -name 'README.md' -type d -exec rm -rf {} +
+	cd ../
   else
 	echo -e "\e[92m[~] File with more than $d line will not be scanned.."
   fi
@@ -527,7 +547,12 @@ portscan()
 #   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
 #   rm "$domain"_masscan.txt
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   naabu -hL subjack_input.txt -rate 100 -verify -retries 4 -timeout 1000 -ports full -silent -o ../portscan/naabu_output.txt
+   for ip in `cat subjack_input.txt`;
+   do
+	host "$ip" | grep "has adress" | cut -d " " -f 4 >> all_ip.txt;
+   done
+   cat all_ip.txt | sort -u >> unique_ip.txt
+   naabu -hL unique.txt -rate 1000 -verify -retries 5 -timeout 2000 -ports full -silent -o ../portscan/naabu_output.txt
    echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
@@ -731,22 +756,22 @@ subdomain()
 #   cd -
    echo -e "\e[92m[~] Subover is in action..."
    sleep 2
-   cd /root/go/src/github.com/Ice3man543/SubOver/
-   ./subover -l "$current"/"$domain"/"$subdirectory"/subdomains/subjack_input.txt -t 100 -timeout 30 -v -o "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_subover.txt
+   cd "$GOPATH"/src/github.com/Ice3man543/SubOver/
+   subover -l "$current"/"$domain"/"$subdirectory"/subdomains/subjack_input.txt -t 100 -timeout 30 -v -o "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_subover.txt
 #   cp subjack_input.txt ../buckets/
    echo -e "\e[92m[~] subover completed his task.."
    echo "*****************************************************************************************"
    cd -
-   cp subjack_input.txt /root/go/src/github.com/anshumanbh/tko-subs/
-   cd /root/go/src/github.com/anshumanbh/tko-subs/
+#   cp subjack_input.txt /root/go/src/github.com/anshumanbh/tko-subs/
+#   cd "$GOPATH"/src/github.com/anshumanbh/tko-subs/
    echo "*****************************************************************************************"
-   echo -e "\e[92m[~] Directory changed.."
+#   echo -e "\e[92m[~] Directory changed.."
    echo -e "\e[92m[~] tko-subs is in action.."
    echo "*****************************************************************************************"
    sleep 1
-   ./tko-subs -domains subjack_input.txt -data providers-data.csv -threads 100
+   tko-subs -domains subjack_input.txt -data "$GOPATH"/src/github.com/anshumanbh/tko-subs/providers-data.csv -threads 50
    echo "*****************************************************************************************"
-   mv output.csv "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_tko-subs.csv
+   mv output.csv "$domain"_tko-subs.csv
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
    count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
    if [ "$count" == 1 ]
