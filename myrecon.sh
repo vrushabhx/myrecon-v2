@@ -176,18 +176,11 @@ vulnscan()
   mkdir sql_result
   mkdir sql_result_heuristic
   mkdir POC
-  sql=300
-  sql_hr=2000
-  b=`cat possible_sqli.txt | wc -l`
   if [ -s possible_sqli.txt ]
   then
         echo -e "\e[92m[~] File found with content.."
-	if [ "$sql" -gt "$b" ]
-	then
-		cp possible_sqli.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m possible_sqli.txt --threads 10 --batch --random-agent --level 3 --risk 3 --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
-	else
-		echo -e "\e[92m[~] File with more than $b line will not be scanned.."
-	fi
+	head -n 300 possible_sqli.txt > sqlmap_input.txt
+	cp sqlmap_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m sqlmap_input.txt --batch --random-agent --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
   else
         echo -e "\e[92m[~] No patterns found for sqli.."
   fi
@@ -198,20 +191,9 @@ vulnscan()
   cd ../URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | qsreplace -a | tee -a ../vulns/heuristic_input.txt
   cd ../vulns/
-  tt=`cat heuristic_input.txt | wc -l`
-  if [ -s heuristic_input.txt ]
-  then
-        echo -e "\e[92m[~] File found with content.."
-	if [ "$sql_hr" -gt "$tt" ]
-	then
-		cp heuristic_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m heuristic_input.txt --batch --random-agent --level 5 --risk 3 --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
-	else
-		echo -e "\e[92m[~] File with more than $b line will not be scanned.."
-	fi
-  else
-	echo -e "\e[92m[~] No patterns found for sqli.."
-  fi
-  rm /root/scripts/bounty/sqlmap-dev/heuristic_input.txt /root/scripts/bounty/sqlmap-dev/possible_sqli.txt
+  head -n 2000 heuristic_input.txt > sqlmap_input_hrs.txt
+  cp sqlmap_input_hrs.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m sqlmap_input_hrs.txt --batch --random-agent --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
+  rm /root/scripts/bounty/sqlmap-dev/sqlmap_input.txt /root/scripts/bounty/sqlmap-dev/sqlmap_input_hrs.txt
   echo "**********************************************************************************************"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible SQLi result start*"}' "$notify" 2>1
@@ -627,7 +609,7 @@ subdomain()
    sleep 1
    echo -e "\e[31m[~] Amass scan started"
    echo "*****************************************************************************************"
-   amass enum -passive -d "$domain" -o amass_result.txt
+   amass enum -passive -d "$domain" -config "$amass_config" -o amass_result.txt
    echo -e "\e[92m[~] Amass scan completed"
    echo "*****************************************************************************************"
    echo -e "\e[92m[~] File saved as amass_result.txt"
@@ -800,6 +782,15 @@ helpFunction()
    exit 1 # Exit script after printing help
 }
 
+check_amass()
+{
+   if [ -z "$amass_config" ]
+	then
+		echo "No amass config path found in .tokens"
+		exit 1
+   fi
+}
+check_amass
 #subdirectory=recon-$(date +"%Y-%m")
 
 while getopts "d:h:m:s:b:w:t:f:e:n:" opt

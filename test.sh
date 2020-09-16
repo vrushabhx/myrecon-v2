@@ -181,3 +181,14 @@ echo "$github_token"
 echo "$ssrf"
 
 exclude
+
+
+
+ss=2000
+her=3000
+if [ "$ss" -gt "$her" ]
+then
+	echo "sqlmap"
+else
+	echo "no"
+fi
