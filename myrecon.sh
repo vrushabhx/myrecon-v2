@@ -99,7 +99,7 @@ vulnscan()
   python3 arjun.py --urls arjun_input.txt -t 50 -o arjun_result.json
   mv arjun_input.txt "$current"/"$domain"/"$subdirectory"/URLs/
   mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
-  rm arjun_input.txt "$domain"_unique.txt
+  rm "$domain"_unique.txt
 
 #gf-patterns and separate files with repect to vulnerabilities
 #SSRF
@@ -468,7 +468,7 @@ dirbruteforce()
    echo "***************************************************************************************************"
    cd ./"$domain"/"$subdirectory"/subdomains/
    cat "$domain"_unique.txt | timeout 1h hakcheckurl | grep -E "(403|200)" | cut -d " " -f 2 >> ffuf_input.txt
-   ffuf -H "X-Forwarded-For: 127.0.0.1" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0" -ac -t 300 -c -sa -fl '1,2,3,4,5,6,7,8,9,10' -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
+   ffuf -H "X-Forwarded-For: 127.0.0.1" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0" -t 300 -c -sa -fl '1,2,3,4,5,6,7,8,9,10' -fc '404,429,501,502,503,500,301,302,307,308,309,204' -of html -o ../directory/ffuf.html -u HOST/FUZZ -w ffuf_input.txt:HOST -w "$wordlist":FUZZ -mode clusterbomb
    mv ffuf_input.txt ../directory/
    #touch "$domain"_gobuster.txt
    #for Host in `cat "$domain"_unique.txt`
@@ -534,7 +534,7 @@ portscan()
 	host "$ip" | grep "has adress" | cut -d " " -f 4 >> all_ip.txt;
    done
    cat all_ip.txt | sort -u >> unique_ip.txt
-   naabu -hL unique.txt -rate 1000 -verify -retries 5 -timeout 2000 -ports full -silent -o ../portscan/naabu_output.txt
+   naabu -hL unique_ip.txt -rate 1000 -verify -retries 5 -timeout 2000 -ports full -silent -o ../portscan/naabu_output.txt
    echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
