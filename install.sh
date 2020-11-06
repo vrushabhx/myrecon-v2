@@ -4,14 +4,23 @@ clear
 
 echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium..\e[00m\n"
 
-sudo apt-get install make make-guile -y
-sudo apt -f install
-sudo apt install unzip nmap figlet python3-pip python-pip jq unzip build-essential moreutils gcc -y
+#sudo apt-get install make make-guile -y
+#sudo apt -f install
+sudo apt install unzip nmap figlet python3-pip python2 jq unzip build-essential moreutils gcc -y
 sudo rm /var/cache/apt/archives/chromium*
 sudo apt install chromium-browser -y
 sudo apt install perl
 
-if ! command -v findomain &> /dev/null
+if ! command -v pip2 &> /dev/null
+then
+        echo -e "\e[92m[~] Not able to find pip2..Installing..\e[00m\n"
+	curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
+	python2 get-pip.py
+else
+        echo -e "\e[31m[!] Skipping installation for pip2..\e[00m\n"
+fi
+
+if ! command -v cargo &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find rust..Installing..\e[00m\n"
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -21,13 +30,14 @@ else
 	echo -e "\e[31m[!] Skipping installation for rust..\e[00m\n"
 fi
 
-if ! command -v findomain &> /dev/null
+if ! command -v go &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find go..Installing..\e[00m\n"
 	cd /root
-	curl -O https://golang.org/dl/go1.15.2.linux-amd64.tar.gz
+	wget "https://golang.org/dl/go1.15.4.linux-amd64.tar.gz"
 	tar -C /usr/local -xzf go1.15.2.linux-amd64.tar.gz
 	export GOPATH=/root/go >> /root/.bashrc
+	source /root/.bashrc
 	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin >> /root/.bashrc
 	source /root/.bashrc
 else
@@ -501,4 +511,4 @@ then
 		cat subdomains.txt all.txt | sort -u > dns_wordlist.txt
 	fi
 fi
-echo -e "\e[92m[~] Installation completed..\[00m"
+echo -e "\e[92m[~] Installation completed..\e[00m"
