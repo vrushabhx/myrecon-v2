@@ -136,7 +136,7 @@ vulnscan()
   if [ -s possible_OR.txt ]
   then
 	echo -e "\e[92m[~] Checking for openredirect.."
-	timeout 3h python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 40
+	timeout 4h python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 100
 	cd openredirect/
 	grep "VULNERABLE" output >> OR_output.txt
 	rm output
@@ -155,7 +155,7 @@ vulnscan()
   if [ -s possible_lfi.txt ]
   then
 	echo -e "\e[92m[~] Checking for LFI.."
-	timeout 3h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 40
+	timeout 4h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 100
 	cd lfi/
 	grep "VULNERABLE" output >> lfi_output.txt
 	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible LFI result start*"}' "$notify" 2>1
@@ -529,12 +529,12 @@ portscan()
 #   cp "$domain"_masscan.txt /root/scripts/bounty/Myrecon/"$domain"/"$subdirectory"/subdomains/
 #   rm "$domain"_masscan.txt
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   for ip in `cat subjack_input.txt`;
-   do
-	host "$ip" | grep "has adress" | cut -d " " -f 4 >> all_ip.txt;
-   done
-   cat all_ip.txt | sort -u >> unique_ip.txt
-   naabu -hL unique_ip.txt -rate 1000 -verify -retries 5 -timeout 2000 -p - -exclude-cdn -silent -o ../portscan/naabu_output.txt
+#   for ip in `cat subjack_input.txt`;
+ #  do
+#	host "$ip" | grep "has adress" | cut -d " " -f 4 >> all_ip.txt;
+ #  done
+  # cat all_ip.txt | sort -u >> unique_ip.txt
+   naabu -iL subjack_input.txt -rate 1000 -verify -retries 5 -timeout 2000 -p - -exclude-cdn -silent -o ../portscan/naabu_output.txt
    echo -e "\e[31m[~] Naabu completed.."
    echo "********************************************************************************"
 #   echo -e "\e[92m[~] Nmap will start to grab banner.."
