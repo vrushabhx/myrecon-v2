@@ -3,7 +3,8 @@
 clear
 
 echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium..\e[00m\n"
-
+sudo add-apt-repository restricted
+apt update
 #sudo apt-get install make make-guile -y
 #sudo apt -f install
 sudo apt install snapd -y
@@ -300,7 +301,7 @@ fi
 if ! command -v subfinder &> /dev/null
 then
 	echo -e "\e[92m[~] Installing subfinder..\e[00m\n"
-	go get -u -v github.com/projectdiscovery/subfinder/cmd/subfinder
+	GO111MODULE=on go get -u -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
 else
 	echo -e "\e[31m[!] subfinder already exist..skipping"
 fi
@@ -354,7 +355,7 @@ fi
 if ! command -v naabu &> /dev/null
 then
 	echo -e "\e[92m[~] Installing naabu..\e[00m\n"
-	go get -v -u github.com/projectdiscovery/naabu/cmd/naabu
+	GO111MODULE=on go get -u -v github.com/projectdiscovery/naabu/v2/cmd/naabu
 else
 	echo -e "\e[31m[!] naabu already exist..skipping"
 fi
@@ -409,7 +410,7 @@ fi
 if ! command -v nuclei &> /dev/null
 then
 	echo -e "\e[92m[~] Installing nuclei..\e[00m\n"
-	go get -u -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
+	GO111MODULE=on go get -u -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
 	nuclei -update-templates
 	cd /root/nuclei-templates/
 	mkdir all
