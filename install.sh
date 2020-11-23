@@ -6,10 +6,18 @@ echo -e "\e[92m[~] Installing nmap,figlet,pip3,pip2, chromium..\e[00m\n"
 
 #sudo apt-get install make make-guile -y
 #sudo apt -f install
-sudo apt install unzip nmap figlet python3-pip python2 jq unzip build-essential moreutils gcc -y
+sudo apt install snapd -y
+sudo apt install unzip -y
+sudo apt install figlet -y
+sudo apt install python2 -y
+sudo apt install build-essential -y
+sudo apt install moreutils -y
+sudo apt install gcc -y
 sudo rm /var/cache/apt/archives/chromium*
 sudo apt install chromium-browser -y
-sudo apt install perl
+sudo apt install perl -y
+snap install jq
+snap install nmap
 
 if ! command -v pip2 &> /dev/null
 then
@@ -35,7 +43,7 @@ then
 	echo -e "\e[92m[~] Not able to find go..Installing..\e[00m\n"
 	cd /root
 	wget "https://golang.org/dl/go1.15.4.linux-amd64.tar.gz"
-	tar -C /usr/local -xzf go1.15.2.linux-amd64.tar.gz
+	tar -C /usr/local -xzf go1.15.4.linux-amd64.tar.gz
 	export GOPATH=/root/go >> /root/.bashrc
 	source /root/.bashrc
 	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin >> /root/.bashrc
