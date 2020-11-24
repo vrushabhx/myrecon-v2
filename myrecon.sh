@@ -68,7 +68,7 @@ vulnscan()
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  timeout 4h nuclei -c 500 -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt -pbar
+  timeout 4h nuclei -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt -c 500 -bulk-size 25 -stats nuclei -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result start*"}' "$notify" 2>1
   cat ../vulns/nuclei_result.txt | slackcat -u "$notify"
@@ -119,7 +119,7 @@ vulnscan()
   then
   	for line in `cat possible_ssti.txt`;
   	do
-		echo $line && python /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
+		echo $line && python2 /root/scripts/bounty/tplmap/tplmap.py -u $line | tee -a ssti_tpl_result.txt;
   	done
   fi
   echo -e "\e[92m[~] Sending data to slack.."
@@ -415,9 +415,9 @@ s3scan()
    echo "***************************************************************************************"
    echo -e "\e[92m[~] Cloud_enum will start.."
    cd /root/scripts/bounty/cloud_enum/
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
-   python3 cloud_enum.py -t 20 -m all.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_s3_bucket.txt -k "$bucket" --disable-azure --disable-gcp
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_gcp_bucket.txt -k "$bucket" --disable-azure --disable-aws
+   python3 cloud_enum.py -t 20 -m permutations.txt -l "$domain"_azure.txt -k "$bucket" --disable-aws --disable-gcp
    echo -e "\e[92m[~] Sending data to slack.."
    curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*S3 result start*"}' "$notify" 2>1
    cat "$domain"_s3_bucket.txt | grep -vE "(FILES|->)" | slackcat -u "$notify"
