@@ -68,7 +68,7 @@ vulnscan()
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  timeout 4h nuclei -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt -c 500 -bulk-size 25 -stats nuclei -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
+  timeout 4h nuclei -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt -c 500 -bulk-size 25 -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result start*"}' "$notify" 2>1
   cat ../vulns/nuclei_result.txt | slackcat -u "$notify"
