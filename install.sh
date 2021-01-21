@@ -12,6 +12,7 @@ sudo apt install unzip -y
 sudo apt install figlet -y
 sudo apt install python2 -y
 sudo apt install python-minimal -y
+sudo apt install python3-pip -y
 sudo apt install build-essential -y
 sudo apt install moreutils -y
 sudo apt install gcc -y
@@ -47,9 +48,11 @@ then
 	cd /root
 	wget "https://golang.org/dl/go1.15.4.linux-amd64.tar.gz"
 	tar -C /usr/local -xzf go1.15.4.linux-amd64.tar.gz
-	export GOPATH=/root/go >> /root/.bashrc
+	export GOPATH=/root/go
+	echo "GOPATH=/root/go" >> /root/.bashrc
 	source /root/.bashrc
-	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin >> /root/.bashrc
+	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+	echo "PATH=$PATH:/usr/local/go/bin:$GOPATH/bin"	>> /root/.bashrc
 	source /root/.bashrc
 else
 	echo -e "\e[31m[!] Skipping installation for Go..\e[00m\n"
