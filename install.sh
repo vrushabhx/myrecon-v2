@@ -34,6 +34,7 @@ if ! command -v cargo &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find rust..Installing..\e[00m\n"
 	curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+	source $HOME/.cargo/env
 	echo "source $HOME/.cargo/env" >> /root/.bashrc
 	source /root/.bashrc
 else
