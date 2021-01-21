@@ -11,6 +11,7 @@ sudo apt install snapd -y
 sudo apt install unzip -y
 sudo apt install figlet -y
 sudo apt install python2 -y
+sudo apt install python-minimal -y
 sudo apt install build-essential -y
 sudo apt install moreutils -y
 sudo apt install gcc -y
