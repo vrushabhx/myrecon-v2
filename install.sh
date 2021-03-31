@@ -50,10 +50,10 @@ then
 	wget "https://golang.org/dl/go1.15.4.linux-amd64.tar.gz"
 	tar -C /usr/local -xzf go1.15.4.linux-amd64.tar.gz
 	export GOPATH=/root/go
-	echo "GOPATH=/root/go" >> /root/.bashrc
+	echo "export GOPATH=/root/go" >> /root/.bashrc
 	source /root/.bashrc
 	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
-	echo "PATH=$PATH:/usr/local/go/bin:$GOPATH/bin"	>> /root/.bashrc
+	echo "export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin"	>> /root/.bashrc
 	source /root/.bashrc
 else
 	echo -e "\e[31m[!] Skipping installation for Go..\e[00m\n"
