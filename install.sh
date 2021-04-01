@@ -361,7 +361,7 @@ fi
 if ! command -v naabu &> /dev/null
 then
 	echo -e "\e[92m[~] Installing naabu..\e[00m\n"
-	GO111MODULE=on go get -u -v github.com/projectdiscovery/naabu/v2/cmd/naabu
+	GO111MODULE=on go get -v github.com/projectdiscovery/naabu/v2/cmd/naabu
 else
 	echo -e "\e[31m[!] naabu already exist..skipping"
 fi
