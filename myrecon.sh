@@ -68,7 +68,8 @@ vulnscan()
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
-  timeout 4h nuclei -l "$domain"_unique.txt -silent -t all/ -o ../vulns/nuclei_result.txt -c 500 -bulk-size 25 -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
+  nuclei -update-templates
+  timeout 6h nuclei -l "$domain"_unique.txt -t /root/nuclei-templates/ -o ../vulns/nuclei_result.txt -retries 3 -c 100 -headless -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result start*"}' "$notify" 2>1
   cat ../vulns/nuclei_result.txt | slackcat -u "$notify"
@@ -96,9 +97,9 @@ vulnscan()
   cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
   cat "$domain"_unique.txt | timeout 1h hakcheckurl | grep -E "(404|200)" | cut -d " " -f 2 >> arjun_input.txt
-  python3 arjun.py --urls arjun_input.txt -t 50 -o arjun_result.json
+  python3 arjun.py -i arjun_input.txt -oT result.txt -t 50 --headers "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   mv arjun_input.txt "$current"/"$domain"/"$subdirectory"/URLs/
-  mv arjun_result.json "$current"/"$domain"/"$subdirectory"/URLs/
+  mv arjun_result.txt "$current"/"$domain"/"$subdirectory"/URLs/
   rm "$domain"_unique.txt
 
 #gf-patterns and separate files with repect to vulnerabilities
@@ -202,7 +203,7 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-  timeout 4h jaeles scan -U "$domain"_unique.txt -c 100 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
+  timeout 4h jaeles scan -U "$domain"_unique.txt -c 100 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Jaeles scanner result start*"}' "$notify" 2>1
   cat ../vulns/jaeles_result/vuln-summary.txt | slackcat -u "$notify"
