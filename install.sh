@@ -419,10 +419,6 @@ then
 	echo -e "\e[92m[~] Installing nuclei..\e[00m\n"
 	GO111MODULE=on go get -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
 	nuclei -update-templates
-	cd /root/nuclei-templates/
-	mkdir all
-	cp -at ./all/ ./**/*.yaml
-	cd /root/scripts/bounty/
 else
 	echo -e "\e[31m[!] nuclei already exist..skipping"
 fi
