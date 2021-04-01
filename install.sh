@@ -403,13 +403,8 @@ fi
 if ! command -v jaeles &> /dev/null
 then
 	echo -e "\e[92m[~] Installing jaeles.."
-	go get -u github.com/jaeles-project/jaeles
+	go get github.com/jaeles-project/jaeles
 	jaeles config -a init
-	cd /root/.jaeles/base-signatures/
-	mkdir all
-	cp -at ./all/ ./**/*.yaml
-	cd all/
-	rm kong-cve-2020-11710\ copy.yaml reachable.yaml replay.yaml
 	cd /root/scripts/bounty/
 else
 	echo -e "\e[31m[!] jaeles already exist..skipping"
