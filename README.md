@@ -2,130 +2,80 @@
 personal recon script for bug bounty
 
 
-### Modified this after a long time..
-
 Make sure you run install.sh with sudo privileges.
 
 
-## Prerequisites
+### Prerequisites
+
+You need to configure gitgrabber and slackcat.
 
 
-* GO 1.13+
+<details open>
+<summary>C tool implemented in this script!</summary>
+<ul>
+<li> massdns</li>
+<ul>
+</details>
 
-* Python3.6 +
+<details open>
+<summary>Rust tool implemented in this script!</summary>
+<ul>
+<li> findomain</li>
+<ul>
+</details>
 
-* python2.7
+<details open>
+<summary>Go tools implemented in this script!</summary>
+<ul>
+<li> assetfinder</li>
+<li> subfinder</li>
+<li> amass</li>
+<li> aquatone</li>
+<li> subjack</li>
+<li> subover</li>
+<li> tko-subs</li>
+<li> naabu</li>
+<li> ffuf</li>
+<li> Waybackurl</li>
+<li> gospider</li>
+<li> jaeles</li>
+<li> nuclei</li>
+<li> kxss</li>
+<li> gf</li>
+<li> dalfox</li>
+<li> qsreplace</li>
+<li> unfurl</li>
+<li> hakcheckurl</li>
+<li> shuffledns</li>
+<ul>
+</details>
 
-* pip2
-
-* pip3
-
-* rust
-
-* make
-
-* perl
-
-* gcc
-
-
-Your GO, rust, python3 path must be set. make sure you can run GO tools directly without calling it from installation directory!!
-
-You need to give token using "-t" flag for scrapping subdomains from github. "Token without any permission" and/or configure your token in .tokens file.
-
-## C tool implemented in this script
-
-* massdns
-
-## Rust tool implemented in this script
-
-* findomain
-
-## GO Tools Implemented in this script
-
-
-* assetfinder
-
-* subfinder
-
-* amass
-
-* httprobe
-
-* aquatone
-
-* subjack
-
-* Subover
-
-* tko-subs
-
-* naabu
-
-* ffuf
-
-* Waybackurl
-
-* gau
-
-* gospider
-
-* jaeles
-
-* nuclei
-
-* kxss
-
-* dalfox
-
-* gf
-
-* qsreplace
-
-* unfurl
-
-* hakcheckurl
-
-* shuffledns
-
-* Slackcat
-
-## Python tools Implemented in this script
-
-
-* smuggler
-
-* github-subdomains.py
-
-* interlace
-
-* cloud_enum
-
-* CRLF-Injection-Scanner
-
-* Linkfinder
-
-* Arjun
-
-* tplmap
-
-* sqlmap from github
-
-* pentest-tools
-
-* gitGraber
-
-* dnsvalidator
-
-* altdns
-
+<details open>
+<summary>Python tools implemented in this script!</summary>
+<ul>
+<li> smuggler</li>
+<li> github-subdomains.py</li>
+<li> interlace</li>
+<li> CRLF-Injection-Scanner</li>
+<li> cloud_enum</li>
+<li> Linkfinder</li>
+<li> Arjun</li>
+<li> tplmap</li>
+<li> sqlmap</li>
+<li> pentest-tools</li>
+<li> dnsvalidator</li>
+<li> gitGraber</li>
+<li> altdns</li>
+<ul>
+</details>
+  
 ## Features 
 
 * added support to call specific modules. Multiple modules can be called using comma separated values.(e.g: -m subdomain,crlf) 
 
 * date-wise folder creation to differentiate your past recon.
 
-* added support to kill the freezed process automatically.
+* Support to kill the freezed process automatically.
 
 * Build your own scan engine
 
@@ -177,22 +127,6 @@ half of the vulnscan module is totally dependent on wayback and spider module.
 
 `bash myrecon.sh -d hackerone.com -m subdomain,wayback,spider,vulnscan`
 
-### Note
-Updating Nuclei templates?
-This script is saving nuclei templates at /root/nuclei-templates/
-after running install.sh it will create a folder called "all" and will copy all templates inside that directory.
-ProjectDiscovery is regularly updating their repo with new templates.
-To update your nuclei templates follow these commands.
-
-```
-cd /root/
-nuclei -update-templates
-cd nuclei-templates/
-mkdir all
-cp -at ./all/ ./**/*.yaml
-```
-
-All templates will be copied to "all" directory and will be used by myrecon.sh in future.
 
 ## Installation
 
@@ -203,8 +137,9 @@ git clone https://github.com/unstabl3/Myrecon.git
 cd Myrecon/
 bash install.sh
 cd ../ && mv Myrecon/ /root/scripts/bounty/ && cd /root/scripts/bounty/Myrecon/
-## Updating the script
 ```
+#### Updating the script
+
 
 ```
 git pull
@@ -288,6 +223,24 @@ The following recon data will be sent to your slack channel!
 * Possible LFI.
 * Possible HTTP request smuggling.
 
+<details open>
+<summary>The following recon data will be sent to your slack channel!</summary>
+<ul>
+<li> Portscan</li>
+<li> Both open and protected S3 buckets</li>
+<li> Both open and proteceted google buckets</li>
+<li> Both open and protected azure blobs</li>
+<li> Nuclei Results</li>
+<li> jaeles result</li>
+<li> Possible XSS</li>
+<li> Possible SSTI</li>
+<li> Possible SQLi</li>
+<li> Possible Open Redirect</li>
+<li> Possible LFI</li>
+<li> Possible HTTP request smuggling</li>
+<ul>
+</details>
+  
 Remaining modules data will be sent if and only if filteration of a output is possible.
 
 ## TO-DO
