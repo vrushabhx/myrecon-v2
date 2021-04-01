@@ -85,6 +85,7 @@ then
 	go get -u github.com/OWASP/Amass/...
 	cd "$GOPATH"/src/github.com/OWASP/Amass/
 	go install ./...
+	cd /root/scripts/bounty/
 	echo -e "\e[93m[~] Configure API keys for better result..\e[00m\n"
 else
         echo -e "\e[31m[!] Skipping installation for amass..\e[00m\n"
