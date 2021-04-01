@@ -417,7 +417,7 @@ fi
 if ! command -v nuclei &> /dev/null
 then
 	echo -e "\e[92m[~] Installing nuclei..\e[00m\n"
-	GO111MODULE=on go get -u -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
+	GO111MODULE=on go get -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
 	nuclei -update-templates
 	cd /root/nuclei-templates/
 	mkdir all
