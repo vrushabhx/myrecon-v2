@@ -69,7 +69,7 @@ echo -e "\e[92m[~] Checking if findomain exist or not..\e[00m"
 if ! command -v findomain &> /dev/null
 then
         echo -e "\e[92m[~] Not able to find findomain..Installing..\e[00m\n"
-	git clone https://github.com/Edu4rdSHL/findomain.git -b develop
+	git clone https://github.com/Edu4rdSHL/findomain.git
 	cd findomain
 	cargo build --release
 	cp ./target/release/findomain /usr/local/bin/findomain
