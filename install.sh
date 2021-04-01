@@ -231,7 +231,7 @@ else
 	pip3 install -r requirements.txt
 	cd wordlists/
 	cat * > all_keywords.txt
-	echo -e "\e[93m[~] Edit config.py with github and slcak tokens..\e[00m\n"
+	echo -e "\e[93m[~] Edit config.py with github and slack tokens..\e[00m\n"
 fi
 cd /root/scripts/bounty/
 
