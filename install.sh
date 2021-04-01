@@ -21,6 +21,7 @@ sudo apt install chromium-browser -y
 sudo apt install perl -y
 snap install jq
 snap install nmap
+apt install -y libpcap-dev
 source $HOME/.cargo/env
 
 if ! command -v pip2 &> /dev/null
