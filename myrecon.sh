@@ -64,6 +64,9 @@ gitrecon()
 vulnscan()
 {
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
+ 
+#CRLF Scanning
+  cat "$domain"_unique.txt | crlfuzz -c 100 -s -o ../vulns/crlf.txt
 #Jaeles Scanner
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
@@ -358,15 +361,15 @@ linkfinder()
 #}
 
 
-crlf()
-{
-   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   echo "*************************************************************************************************"
-   echo -e "\e[92m[~] Scanning for CRLF injection.."
-   echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
-   echo "*************************************************************************************************"
-   cat subjack_input.txt | timeout 3h interlace -threads 10 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
-   echo "*************************************************************************************************"
+#crlf()
+#{
+ #  cd "$current"/"$domain"/"$subdirectory"/subdomains/
+ #  echo "*************************************************************************************************"
+ #  echo -e "\e[92m[~] Scanning for CRLF injection.."
+ #  echo -e "\e[92m[~] CRLF-Injection-Scanner will be in action.."
+ #  echo "*************************************************************************************************"
+ #  cat subjack_input.txt | timeout 3h interlace -threads 10 -c "crlf scan -u _target_" -v | tee -a ../vulns/crlf_result.txt
+ #  echo "*************************************************************************************************"
    #if [ -e "$domain"_crlf.txt ]
    #then
 	#cat "$domain"_crlf.txt
@@ -378,14 +381,14 @@ crlf()
 #	echo "********************************************************************************************"
  #  fi
   # rm "$domain"_unique.txt
-   if [ -z "$module" ]
-   then
-	linkfinder
-   else
-        echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
-        echo "************************************************************************************"
-   fi
-}
+#   if [ -z "$module" ]
+ #  then
+#	linkfinder
+ #  else
+ #       echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
+ #       echo "************************************************************************************"
+ #  fi
+#}
 
 
 s3scan()
@@ -452,7 +455,7 @@ s3scan()
   # rm bucket_finder_op.txt "$domain"_unique.txt
   if [ -z "$module" ]
   then
-	crlf
+	linkfinder
   else
         echo -e "\e[92m[~] $module completed results can be found in $current/$domain/$subdirectory"
         echo "************************************************************************************"
