@@ -47,6 +47,7 @@ You need to configure gitgrabber and slackcat.
 <li> unfurl</li>
 <li> hakcheckurl</li>
 <li> shuffledns</li>
+<li> crlfuzz</li>
 <ul>
 </details>
 
@@ -56,7 +57,6 @@ You need to configure gitgrabber and slackcat.
 <li> smuggler</li>
 <li> github-subdomains.py</li>
 <li> interlace</li>
-<li> CRLF-Injection-Scanner</li>
 <li> cloud_enum</li>
 <li> Linkfinder</li>
 <li> Arjun</li>
