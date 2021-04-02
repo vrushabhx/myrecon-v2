@@ -150,18 +150,6 @@ else
 	cd ../
 fi
 
-if [ -d CRLF-Injection-Scanner ]
-then
-	echo -e "\e[31m[!] CRLF-Injection-Scanner already exist.. skipping installation..\e[00m\n"
-	echo -e "\e[93m[~] To update specific tools use git pull from tool directory..\e[00m\n"
-else
-	echo -e "\e[92m[~] Installing CRLF-Injection-Scanner..\e[00m\n"
-	git clone https://github.com/MichaelStott/CRLF-Injection-Scanner.git
-	cd CRLF-Injection-Scanner/
-	python3 setup.py install
-	cd ../
-fi
-
 if [ -d LinkFinder ]
 then
 	echo -e "\e[31m[!] LinkFinder already exist.. skipping installation..\e[00m\n"
@@ -449,6 +437,15 @@ then
 else
 	echo -e "\e[31m[!] gf already exist..skipping"
 fi
+
+if ! command -v crlfuzz &> /dev/null
+then
+	echo -e "\e[92m[~] Installing crlfuzz.."
+	GO111MODULE=on go get -v github.com/dwisiswant0/crlfuzz/cmd/crlfuzz
+else
+	echo -e "\e[31m[!] crlfuzz already exist..skipping"
+fi
+
 cd /root/scripts/bounty/
 if [ -d Gf-Patterns ]
 then
