@@ -117,7 +117,7 @@ vulnscan()
 #SSTI
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | gf ssti | tee -a ../vulns/possible_ssti.txt
   cd ../vulns/
-  ssti=200
+  ssti=100
   t=`cat possible_ssti.txt | wc -l`
   if [ "$ssti" -gt "$t" ]
   then
