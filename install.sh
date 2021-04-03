@@ -170,6 +170,9 @@ then
 else
 	echo -e "\e[92m[~] Installing Arjun..\e[00m\n"
 	git clone https://github.com/s0md3v/Arjun.git
+	cd Arjun
+	python3 setup.py install
+	cd ../
 fi
 
 if [ -d tplmap ]
