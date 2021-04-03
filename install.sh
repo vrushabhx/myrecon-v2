@@ -21,6 +21,7 @@ sudo apt install chromium-browser -y
 sudo apt install perl -y
 snap install jq
 snap install nmap
+snap connect nmap:network-control
 apt install -y libpcap-dev
 source $HOME/.cargo/env
 
