@@ -183,7 +183,7 @@ vulnscan()
   if [ -s possible_sqli.txt ]
   then
         echo -e "\e[92m[~] File found with content.."
-	head -n 300 possible_sqli.txt > sqlmap_input.txt
+	head -n 100 possible_sqli.txt > sqlmap_input.txt
 	cp sqlmap_input.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m sqlmap_input.txt --batch --random-agent --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result/
   else
         echo -e "\e[92m[~] No patterns found for sqli.."
@@ -195,7 +195,7 @@ vulnscan()
   cd ../URLs/
   cat clean_url.txt spider_clean_1.txt spider_clean_2.txt | grep "=" | qsreplace -a | tee -a ../vulns/heuristic_input.txt
   cd ../vulns/
-  head -n 2000 heuristic_input.txt > sqlmap_input_hrs.txt
+  head -n 500 heuristic_input.txt > sqlmap_input_hrs.txt
   cp sqlmap_input_hrs.txt /root/scripts/bounty/sqlmap-dev/ && python3 /root/scripts/bounty/sqlmap-dev/sqlmap.py -m sqlmap_input_hrs.txt --batch --random-agent --smart --output-dir="$current"/"$domain"/"$subdirectory"/vulns/sql_result_heuristic
   rm /root/scripts/bounty/sqlmap-dev/sqlmap_input.txt /root/scripts/bounty/sqlmap-dev/sqlmap_input_hrs.txt
   echo "**********************************************************************************************"
