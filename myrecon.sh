@@ -72,7 +72,7 @@ vulnscan()
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
 #Nuclei Scanner
   nuclei -update-templates
-  timeout 6h nuclei -l "$domain"_unique.txt -t /root/nuclei-templates/ -o ../vulns/nuclei_result.txt -retries 3 -c 100 -headless -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
+  nuclei -l "$domain"_unique.txt -t /root/nuclei-templates/ -o ../vulns/nuclei_result.txt -retries 3 -c 100 -headless -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Nuclei result start*"}' "$notify" 2>1
   cat ../vulns/nuclei_result.txt | slackcat -u "$notify"
@@ -140,7 +140,7 @@ vulnscan()
   if [ -s possible_OR.txt ]
   then
 	echo -e "\e[92m[~] Checking for openredirect.."
-	timeout 4h python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 100
+	timeout 2h python3 /root/scripts/bounty/pentest-tools/openredirect.py -u possible_OR.txt -p /root/scripts/bounty/Myrecon/OR_payloads.txt -t 100
 	cd openredirect/
 	grep "VULNERABLE" output >> OR_output.txt
 	rm output
@@ -159,7 +159,7 @@ vulnscan()
   if [ -s possible_lfi.txt ]
   then
 	echo -e "\e[92m[~] Checking for LFI.."
-	timeout 4h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 100
+	timeout 2h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 100
 	cd lfi/
 	grep "VULNERABLE" output >> lfi_output.txt
 	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible LFI result start*"}' "$notify" 2>1
@@ -206,7 +206,7 @@ vulnscan()
 #Jaeles Scanner
   mkdir ../vulns/jaeles_result
   cd "$current"/"$domain"/"$subdirectory"/subdomains/
-  timeout 4h jaeles scan -U "$domain"_unique.txt -c 100 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
+  timeout 2h jaeles scan -U "$domain"_unique.txt -c 100 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/" -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   echo -e "\e[92m[~] Sending data to slack.."
   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Jaeles scanner result start*"}' "$notify" 2>1
   cat ../vulns/jaeles_result/vuln-summary.txt | slackcat -u "$notify"
