@@ -27,7 +27,7 @@ source $HOME/.cargo/env
 if ! command -v pip2 &> /dev/null
 then
         echo -e "\e[92m[~] Not able to find pip2..Installing..\e[00m\n"
-	curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py
+	curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
 	python2 get-pip.py
 else
         echo -e "\e[31m[!] Skipping installation for pip2..\e[00m\n"
