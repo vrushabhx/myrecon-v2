@@ -519,5 +519,11 @@ then
 		wget https://raw.githubusercontent.com/assetnote/commonspeak2-wordlists/master/subdomains/subdomains.txt
 		cat subdomains.txt all.txt | sort -u > dns_wordlist.txt
 	fi
+	if [ -f LFI-Jhaddix.txt ]
+	then
+		echo -e "\e[31m[!] Payloads for LFI testing are already downloaded.."
+	else
+		wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/LFI/LFI-Jhaddix.txt
+	fi
 fi
 echo -e "\e[92m[~] Installation completed..\e[00m"
