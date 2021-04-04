@@ -104,7 +104,7 @@ vulnscan()
   cp ../subdomains/"$domain"_unique.txt /root/scripts/bounty/Arjun/
   cd /root/scripts/bounty/Arjun/
   cat "$domain"_unique.txt | timeout 1h hakcheckurl | grep -E "(404|200)" | cut -d " " -f 2 >> arjun_input.txt
-  arjun -i arjun_input.txt -oT result.txt -t 50 --headers "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
+  arjun -i arjun_input.txt -oT arjun_result.txt -t 50 --headers "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
   mv arjun_input.txt "$current"/"$domain"/"$subdirectory"/URLs/
   mv arjun_result.txt "$current"/"$domain"/"$subdirectory"/URLs/
   rm "$domain"_unique.txt
