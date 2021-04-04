@@ -67,6 +67,10 @@ vulnscan()
  
 #CRLF Scanning
   cat "$domain"_unique.txt | crlfuzz -c 100 -s -o ../vulns/crlf.txt
+  echo -e "\e[92m[~] Sending data to slack.."
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*CRLF result start*"}' "$notify" 2>1
+  cat ../vulns/crlf.txt | slackcat -u "$notify"
+  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*CRLF result end*"}' "$notify" 2>1
 #Jaeles Scanner
 #  mkdir ../vulns/jaeles_result
  # jaeles scan -U "$domain"_unique.txt -c 150 -L 2 -o ../vulns/jaeles_result -s "/root/.jaeles/base-signatures/all/.*"
