@@ -109,8 +109,6 @@ You need to configure gitgrabber and slackcat.
 
 ### Note
 Modules flow is necessary! you can't call vulnscan before wayback and/or spider.
-
-### Note
 To call specific modules, you must have ran the script at least one time with succesful completion of subdomain module.
 
 ### Example
@@ -157,24 +155,13 @@ You need to edit a Myrecon/.tokens file with github_token, wordlist, your ssrf d
 
 The script is flexible. Priority will be given to the command line arguments. If you don't provide command line arguments script will take values from .tokens file
 
-### .tokens file
-
-github_token=""
-
-slack_webhook=""
-
-blind_xss=""
-
-ssrf_url=""
-
-static_wordlist="/root/wordlist/dicc.txt"
 
 ## How-to-use
-1) Basic scan
+1) Basic scan using command line arguments.
 
 `bash myrecon.sh -d hackerone.com -b blindxss -s ssrf -w wordlist -e blog.hackerone.com`
 
-2) Using module
+2) Using only specific single module.
 
 `bash myrecon.sh -d hackerone.com -m subdomain -b blindxss -s ssrf -w wordlist -t github_token`
 
@@ -207,21 +194,6 @@ or if you have .tokens properly configured
 
 Notifications will be send to slack using "Slackcat" tool! You need to create Slack channel in your workspace and enable incoming webhook! Copy the webhook and save it in the .tokens file.
 If you wish you can give webhook as a command-line argument using "-n" flag.
-
-The following recon data will be sent to your slack channel!
-
-* Portscan.
-* Both open and protected S3 buckets.
-* Both open and proteceted google buckets.
-* Both open and protected azure blobs.
-* Nuclei Results.
-* jaeles result.
-* Possible XSS.
-* Possible SSTI.
-* Possible SQLi.
-* Possible Open Redirect.
-* Possible LFI.
-* Possible HTTP request smuggling.
 
 <details open>
 <summary>The following recon data will be sent to your slack channel!</summary>
