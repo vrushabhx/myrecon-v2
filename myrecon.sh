@@ -159,7 +159,7 @@ vulnscan()
   if [ -s possible_lfi.txt ]
   then
 	echo -e "\e[92m[~] Checking for LFI.."
-	timeout 2h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/pentest-tools/LFI-Jhaddix.txt -t 100
+	timeout 2h python3 /root/scripts/bounty/pentest-tools/lfi.py -u possible_lfi.txt -p /root/scripts/bounty/wordlists/LFI-Jhaddix.txt -t 100 -v 1
 	cd lfi/
 	grep "VULNERABLE" output >> lfi_output.txt
 	curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Possible LFI result start*"}' "$notify" 2>1
