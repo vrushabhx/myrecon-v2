@@ -562,8 +562,10 @@ portscan()
    curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Portscan result start*"}' "$notify" 2>1
    cat ../portscan/nmap_result_filtered.txt | slackcat -u "$notify"
    curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*Portscan result end*"}' "$notify" 2>1
-   mv naabu_output_ports.txt ../portscan/
-   mv naabu_output_targets.txt ../portscan/
+   mv naabu_output_ports.txt naabu_output_targets.txt ../portscan/
+   mv /root/scripts/bounty/Myrecon/nmap.xml ../portscan/
+   cd ../portscan
+   gowitness nmap -f nmap.xml --open
    if [ -z "$module" ]
    then
 	dirbruteforce
