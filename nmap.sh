@@ -35,6 +35,6 @@ echo "Running nmap service scan on found results."
 echo "Executing nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV"
 
 nmap -iL $TARGETSFILE -p ${ports:0:-1} -sV -T3 -oA nmap
-mv nmap.xml /root/scripts/Myrecon/
+mv nmap.xml /root/scripts/bounty/Myrecon/
 cat ../portscan/nmap.nmap | grep -vE "(SF:|SF-P|NEXT SERVICE FINGERPRINT|unrecognized|scanned|closed|filtered|incorrect|==|commands)" > ../portscan/nmap_result_filtered.txt
 rm ../portscan/nmap.nmap nmap.gnmap
