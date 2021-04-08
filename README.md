@@ -48,6 +48,7 @@ You need to configure gitgrabber and slackcat.
 <li> hakcheckurl</li>
 <li> shuffledns</li>
 <li> crlfuzz</li>
+<li> Gowitness</li>
 <ul>
 </details>
 
