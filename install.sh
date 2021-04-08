@@ -450,6 +450,14 @@ else
 	echo -e "\e[31m[!] crlfuzz already exist..skipping"
 fi
 
+if ! command -v gowitness &> /dev/null
+then
+	echo -e "\e[92m[~] Installing gowitness.."
+	go get -u -v github.com/sensepost/gowitness
+else
+	echo -e "\e[31m[!] gowitness already exist..skipping"
+fi
+
 cd /root/scripts/bounty/
 if [ -d Gf-Patterns ]
 then
