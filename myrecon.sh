@@ -566,6 +566,10 @@ portscan()
    mv /root/scripts/bounty/Myrecon/nmap.xml ../portscan/
    cd ../portscan
    gowitness nmap -f nmap.xml --open
+   gowitness report list > port_vuln.txt
+   cat port_vuln.txt | cut -d " " -f 2 | grep -Ei ":[0-9]+" > port_vuln_input.txt
+   rm port_vuln.txt
+   nuclei -l port_vuln_input.txt -t /root/nuclei-templates/ -o ../vulns/port_vuln_result.txt -retries 3 -c 100 -stats -severity critical,high,medium,low -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:72.0) Gecko/20100101 Firefox/72.0"
    if [ -z "$module" ]
    then
 	dirbruteforce
