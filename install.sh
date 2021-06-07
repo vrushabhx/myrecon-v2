@@ -12,6 +12,7 @@ sudo apt install unzip -y
 sudo apt install figlet -y
 sudo apt install python2 -y
 sudo apt install python-minimal -y
+sudo apt install python2-minimal -y
 sudo apt install python3-pip -y
 sudo apt install build-essential -y
 sudo apt install moreutils -y
