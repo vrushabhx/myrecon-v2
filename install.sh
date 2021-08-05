@@ -84,7 +84,9 @@ fi
 if ! command -v amass &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find amass..Installing..\e[00m\n"
-	go get -v github.com/OWASP/Amass/v3/...
+	go get -u github.com/OWASP/Amass/...
+	cd "$GOPATH"/src/github.com/OWASP/Amass/
+	go install ./...
 	cd /root/scripts/bounty/
 	echo -e "\e[93m[~] Configure API keys for better result..\e[00m\n"
 else
