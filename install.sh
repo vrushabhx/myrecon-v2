@@ -396,8 +396,8 @@ fi
 if ! command -v jaeles &> /dev/null
 then
 	echo -e "\e[92m[~] Installing jaeles.."
-	go get github.com/jaeles-project/jaeles
-	jaeles config -a init
+	GO111MODULE=on go get github.com/jaeles-project/jaeles
+	jaeles config init
 	cd /root/scripts/bounty/
 else
 	echo -e "\e[31m[!] jaeles already exist..skipping"
