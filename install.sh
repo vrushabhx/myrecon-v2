@@ -302,7 +302,7 @@ fi
 if ! command -v subfinder &> /dev/null
 then
 	echo -e "\e[92m[~] Installing subfinder..\e[00m\n"
-	GO111MODULE=on go get -u -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder
+	go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest
 else
 	echo -e "\e[31m[!] subfinder already exist..skipping"
 fi
@@ -356,7 +356,9 @@ fi
 if ! command -v naabu &> /dev/null
 then
 	echo -e "\e[92m[~] Installing naabu..\e[00m\n"
-	GO111MODULE=on go get -v github.com/projectdiscovery/naabu/v2/cmd/naabu
+	sudo apt install -y libpcap-dev
+	go install -v github.com/projectdiscovery/naabu/v2/cmd/naabu@latest
+	
 else
 	echo -e "\e[31m[!] naabu already exist..skipping"
 fi
@@ -406,7 +408,7 @@ fi
 if ! command -v nuclei &> /dev/null
 then
 	echo -e "\e[92m[~] Installing nuclei..\e[00m\n"
-	GO111MODULE=on go get -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei
+	go install -v github.com/projectdiscovery/nuclei/v2/cmd/nuclei@latest
 	nuclei -update-templates
 else
 	echo -e "\e[31m[!] nuclei already exist..skipping"
@@ -509,6 +511,14 @@ then
 else
         echo -e "\e[92m[!] Slackcat already exist..skipping"
 	echo -e "\e[93m[~] Configure slack_webhook in .tokens.."
+fi
+
+if ! command -v httpx &> /dev/null
+then
+        echo -e "\e[92m[~] Installing httpx..\e[00m\n"
+        go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+else
+        echo -e "\e[92m[!] httpx already exist..skipping"
 fi
 
 cd /root/scripts/bounty/
