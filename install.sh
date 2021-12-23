@@ -382,7 +382,7 @@ fi
 if ! command -v gau &> /dev/null
 then
 	echo -e "\e[92m[~] Installing gau.."
-	go get -u -v github.com/lc/gau
+	go install github.com/lc/gau/v2/cmd/gau@latest
 else
 	echo -e "\e[31m[!] gau already exist..skipping"
 fi
