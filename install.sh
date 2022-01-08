@@ -325,34 +325,6 @@ else
 	echo -e "\e[31m[!] aquatone already exist..skipping"
 fi
 
-if ! command -v subjack &> /dev/null
-then
-	echo -e "\e[92m[~] Installing subjack.."
-	go get -u github.com/haccer/subjack
-else
-	echo -e "\e[31m[!] subjack already exist..skipping"
-fi
-
-if ! command -v subover &> /dev/null
-then
-	echo -e "\e[92m[~] Installing subover.."
-	go get -u github.com/Ice3man543/SubOver
-	cd $GOPATH/src/github.com/Ice3man543/SubOver/
-	go build subover.go
-	cp subover /usr/local/bin/
-	cd -
-else
-	echo -e "\e[31m[!] subover already exist..skipping"
-fi
-
-if ! command -v tko-subs &> /dev/null
-then
-	echo -e "\e[92m[~] Installing tko-subs.."
-	go get -u github.com/anshumanbh/tko-subs
-else
-	echo -e "\e[31m[!] tko-subs already exist..skipping"
-fi
-
 if ! command -v naabu &> /dev/null
 then
 	echo -e "\e[92m[~] Installing naabu..\e[00m\n"
