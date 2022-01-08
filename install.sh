@@ -238,47 +238,6 @@ else
 	git clone https://github.com/defparam/smuggler.git
 fi
 
-if [ -d dnsvalidator ]
-then
-	echo -e "\e[31m[!] dnsvalidatior already exist.. skipping installation..\e[00m\n"
-	echo -e "\e[93m[~] To update specific tools use git pull from tool directory..\e[00m\n"
-else
-	echo -e "\e[92m[~] Installing dnsvalidator..\e[00m\n"
-	git clone https://github.com/vortexau/dnsvalidator.git
-	cd dnsvalidator/
-	python3 setup.py install
-	cd ../
-	mkdir wordlists/
-	cd wordlists/
-	echo -e "\e[93m[~] gathering working dnsresolvers..This is one time..please wait..\e[00m\n"
-	echo -e "\e[93m[~] If you wish to change resolvers list for bruteforcing change it here /root/scripts/bounty/wordlists..\e[00m\n"
-	if [ -f resolvers.txt ]
-	then
-		echo -e "\e[31[!] Resolvers already exist..\e[00m\n"
-	else
-		wget https://public-dns.info/nameservers.txt
-		cat /root/scripts/bounty/massdns/lists/resolvers.txt >> nameservers.txt
-		dnsvalidator -tL nameservers.txt -threads 50 --silent >> resolvers.txt
-		echo -e "\e[92m[~] Gathered public dns servers for subdomain bruteforcing..\e[00m\n"
-	fi
-	cd ../
-fi
-
-if [ -d dnsgen ]
-then
-        echo -e "\e[31m[!] dnsgen already exist.. skipping installation..\e[00m\n"
-        echo -e "\e[93m[~] To update specific tools use git pull from tool directory..\e[00m\n"
-else
-	echo -e "\e[92m[~] Installing dnsgen..\e[00m\n"
-	git clone https://github.com/ProjectAnte/dnsgen
-	cd dnsgen
-	pip3 install -r requirements.txt
-	python3 setup.py install
-	wget https://raw.githubusercontent.com/infosec-au/altdns/master/words.txt
-	wget https://raw.githubusercontent.com/ProjectAnte/dnsgen/master/dnsgen/words.txt
-	cat words.txt words.txt.1 | sort -u > /root/scripts/bounty/wordlists/alter.txt
-	cd ../
-fi
 
 echo "***************************************************************************************"
 echo -e "\e[92m[~] Installing GO tools.."
@@ -294,7 +253,7 @@ echo -e "\e[92m[~] Installing GO tools.."
 if ! command -v assetfinder &> /dev/null
 then
 	echo -e "\e[92m[~] Installing assetfinder.."
-	go get -u github.com/tomnomnom/assetfinder
+	go install -v github.com/tomnomnom/assetfinder@latest
 else
 	echo -e "\e[31m[!] assetfinder already exist..skipping"
 fi
@@ -310,7 +269,7 @@ fi
 if ! command -v httprobe &> /dev/null
 then
 	echo -e "\e[92m[~] Installing httprobe.."
-	go get -u github.com/tomnomnom/httprobe
+	go install -v github.com/tomnomnom/httprobe@latest
 else
 	echo -e "\e[31m[!] httprobe already exist..skipping"
 fi
@@ -338,7 +297,7 @@ fi
 if ! command -v ffuf &> /dev/null
 then
 	echo -e "\e[92m[~] Installing ffuf.."
-	go get -u github.com/ffuf/ffuf
+	go install -v github.com/ffuf/ffuf@latest
 else
 	echo -e "\e[31m[!] ffuf already exist..skipping"
 fi
@@ -346,7 +305,7 @@ fi
 if ! command -v waybackurls &> /dev/null
 then
 	echo -e "\e[92m[~] Installing Waybackurl.."
-	go get -u github.com/tomnomnom/waybackurls
+	go install -v github.com/tomnomnom/waybackurls@latest
 else
 	echo -e "\e[31m[!] waybackurls already exist..skipping"
 fi
@@ -354,7 +313,7 @@ fi
 if ! command -v gau &> /dev/null
 then
 	echo -e "\e[92m[~] Installing gau.."
-	go install github.com/lc/gau/v2/cmd/gau@latest
+	go install -v github.com/lc/gau/v2/cmd/gau@latest
 else
 	echo -e "\e[31m[!] gau already exist..skipping"
 fi
@@ -362,7 +321,7 @@ fi
 if ! command -v gospider &> /dev/null
 then
 	echo -e "\e[92m[~] Installing gospider.."
-	go get -u github.com/jaeles-project/gospider
+	GO111MODULE=on go install -v github.com/jaeles-project/gospider@latest
 else
 	echo -e "\e[31m[!] gospider already exist..skipping"
 fi
@@ -370,7 +329,7 @@ fi
 if ! command -v jaeles &> /dev/null
 then
 	echo -e "\e[92m[~] Installing jaeles.."
-	GO111MODULE=on go get github.com/jaeles-project/jaeles
+	GO111MODULE=on go install -v github.com/jaeles-project/jaeles@latest
 	jaeles config init
 	cd /root/scripts/bounty/
 else
@@ -401,7 +360,7 @@ fi
 if ! command -v dalfox &> /dev/null
 then
 	echo -e "\e[92m[~] Installing dalfox..\e[00m\n"
-	go get -u -v github.com/hahwul/dalfox
+	go install -v github.com/hahwul/dalfox/v2@latest
 else
 	echo -e "\e[31m[!] dalfox already exist..skipping"
 fi
@@ -409,7 +368,7 @@ fi
 if ! command -v gf &> /dev/null
 then
 	echo -e "\e[92m[~] Installing gf.."
-	go get -u github.com/tomnomnom/gf
+	go install -v github.com/tomnomnom/gf@latest
 	echo 'source $GOPATH/src/github.com/tomnomnom/gf/gf-completion.bash' >> /root/.bashrc
 	mkdir /root/.gf
 	cp -r $GOPATH/src/github.com/tomnomnom/gf/examples ~/.gf
@@ -420,7 +379,7 @@ fi
 if ! command -v crlfuzz &> /dev/null
 then
 	echo -e "\e[92m[~] Installing crlfuzz.."
-	GO111MODULE=on go get -v github.com/dwisiswant0/crlfuzz/cmd/crlfuzz
+	GO111MODULE=on go install -v github.com/dwisiswant0/crlfuzz/cmd/crlfuzz@latest
 else
 	echo -e "\e[31m[!] crlfuzz already exist..skipping"
 fi
@@ -428,7 +387,7 @@ fi
 if ! command -v gowitness &> /dev/null
 then
 	echo -e "\e[92m[~] Installing gowitness.."
-	go get -u -v github.com/sensepost/gowitness
+	go install -v github.com/sensepost/gowitness@latest
 else
 	echo -e "\e[31m[!] gowitness already exist..skipping"
 fi
@@ -447,7 +406,7 @@ fi
 if ! command -v qsreplace &> /dev/null
 then
 	echo -e "\e[92m[~] Installing qsreplace..\e[00m\n"
-	go get -u github.com/tomnomnom/qsreplace
+	go install -v github.com/tomnomnom/qsreplace@latest
 else
 	echo -e "\e[31m[!] qsreplace already exist..skipping"
 fi
@@ -455,7 +414,7 @@ fi
 if ! command -v unfurl &> /dev/null
 then
 	echo -e "\e[92m[~] Installing unfurl.."
-	go get -u github.com/tomnomnom/unfurl
+	go install -v github.com/tomnomnom/unfurl@latest
 else
 	echo -e "\e[31m[!] unfurl already exist..skipping"
 fi
@@ -463,23 +422,16 @@ fi
 if ! command -v hakcheckurl &> /dev/null
 then
 	echo -e "\e[92m[~] Installing hakcheckurl.."
-	go get -u github.com/hakluke/hakcheckurl
+	go install -v github.com/hakluke/hakcheckurl@latest
 else
 	echo -e "\e[31m[!] Hakcheckurl already exist..skipping"
 fi
 
-if ! command -v shuffledns &> /dev/null
-then
-        echo -e "\e[92m[~] Installing shuffledns..\e[00m\n"
-	go get -u -v github.com/projectdiscovery/shuffledns/cmd/shuffledns
-else
-        echo -e "\e[31m[!] Shuffledns already exist..skipping"
-fi
 
 if ! command -v slackcat &> /dev/null
 then
         echo -e "\e[92m[~] Installing Slackcat..\e[00m\n"
-        go get -u -v github.com/dwisiswant0/slackcat
+	go install -v github.com/dwisiswant0/slackcat@latest
 else
         echo -e "\e[92m[!] Slackcat already exist..skipping"
 	echo -e "\e[93m[~] Configure slack_webhook in .tokens.."
