@@ -731,54 +731,54 @@ subdomain()
    mv aquatone_result ../screenshot/
 #   rm -rf "$domain"_unique.txt headers html aquatone_urls.txt
 #   cd "$current"
-   echo "*****************************************************************************************"
-   echo -e "\e[92m[~] Script will now scan for subdomain takeover"
-   echo "*****************************************************************************************"
+#   echo "*****************************************************************************************"
+#   echo -e "\e[92m[~] Script will now scan for subdomain takeover"
+#   echo "*****************************************************************************************"
  #  sleep 2
 #   cp "$domain"_unique.txt /root/go/src/github.com/haccer/subjack/
 #   cd /root/go/src/github.com/haccer/subjack
 #   echo -e "\e[92m[~] Directory changed.."
-   echo -e "\e[92m[~] Subjack is in action.."
-   echo "*****************************************************************************************"
+#   echo -e "\e[92m[~] Subjack is in action.."
+ #  echo "*****************************************************************************************"
    sed -e 's/https:\/\///g; s/http:\/\///g' "$domain"_unique.txt | sort -u >> subjack_input.txt
-   sleep 2
-   subjack -m -t 50 -timeout 20 -v -w subjack_input.txt -o subjack_result.txt
-   echo -e "\e[92m[~] subjack completed his task.."
-   echo -e "\e[92m[~] Sending Takeover result to the slack.."
-   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result start*"}' "$notify" 2>1
-   cat subjack_result.txt | grep -v "Vulnerable" | slackcat -u "$notify"
-   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result end*"}' "$notify" 2>1
-   echo "*****************************************************************************************"
+#   sleep 2
+ #  subjack -m -t 50 -timeout 20 -v -w subjack_input.txt -o subjack_result.txt
+  # echo -e "\e[92m[~] subjack completed his task.."
+   #echo -e "\e[92m[~] Sending Takeover result to the slack.."
+#   curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result start*"}' "$notify" 2>1
+ #  cat subjack_result.txt | grep -v "Vulnerable" | slackcat -u "$notify"
+ #  curl -s -X POST -H 'Content-type: application/json' --data '{"text":"*subjack result end*"}' "$notify" 2>1
+  # echo "*****************************************************************************************"
 #   cd -
-   echo -e "\e[92m[~] Subover is in action..."
-   sleep 2
-   cd "$GOPATH"/src/github.com/Ice3man543/SubOver/
-   subover -l "$current"/"$domain"/"$subdirectory"/subdomains/subjack_input.txt -t 100 -timeout 30 -v -o "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_subover.txt
+#   echo -e "\e[92m[~] Subover is in action..."
+ #  sleep 2
+  # cd "$GOPATH"/src/github.com/Ice3man543/SubOver/
+  # subover -l "$current"/"$domain"/"$subdirectory"/subdomains/subjack_input.txt -t 100 -timeout 30 -v -o "$current"/"$domain"/"$subdirectory"/subdomains/"$domain"_subover.txt
 #   cp subjack_input.txt ../buckets/
-   echo -e "\e[92m[~] subover completed his task.."
-   echo "*****************************************************************************************"
-   cd -
+  # echo -e "\e[92m[~] subover completed his task.."
+   #echo "*****************************************************************************************"
+#   cd -
 #   cp subjack_input.txt /root/go/src/github.com/anshumanbh/tko-subs/
 #   cd "$GOPATH"/src/github.com/anshumanbh/tko-subs/
-   echo "*****************************************************************************************"
+#   echo "*****************************************************************************************"
 #   echo -e "\e[92m[~] Directory changed.."
-   echo -e "\e[92m[~] tko-subs is in action.."
-   echo "*****************************************************************************************"
-   sleep 1
-   tko-subs -domains subjack_input.txt -data "$GOPATH"/src/github.com/anshumanbh/tko-subs/providers-data.csv -threads 50
-   echo "*****************************************************************************************"
-   mv output.csv "$domain"_tko-subs.csv
+#   echo -e "\e[92m[~] tko-subs is in action.."
+ #  echo "*****************************************************************************************"
+  # sleep 1
+  # tko-subs -domains subjack_input.txt -data "$GOPATH"/src/github.com/anshumanbh/tko-subs/providers-data.csv -threads 50
+  # echo "*****************************************************************************************"
+  # mv output.csv "$domain"_tko-subs.csv
    cd "$current"/"$domain"/"$subdirectory"/subdomains/
-   count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
-   if [ "$count" == 1 ]
-   then
-	echo -e "\e[31m[~] No takeovers found.."
-	echo "************************************************************************************"
-   else
-	echo -e "\e[92m[~] Possible Takeovers found check manually.."
-	cat "$domain"_tko-subs.csv
-	echo "************************************************************************************"
-   fi
+ #  count=`wc -l "$domain"_tko-subs.csv | cut -d " " -f 1`
+#   if [ "$count" == 1 ]
+ #  then
+#	echo -e "\e[31m[~] No takeovers found.."
+#	echo "************************************************************************************"
+ #  else
+#	echo -e "\e[92m[~] Possible Takeovers found check manually.."
+#	cat "$domain"_tko-subs.csv
+#	echo "************************************************************************************"
+ #  fi
    if [ -z "$module" ]
    then
 	portscan
