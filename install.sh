@@ -50,10 +50,9 @@ if ! command -v go &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find go..Installing..\e[00m\n"
 	cd /root
-	wget "https://go.dev/dl/go1.19.5.src.tar.gz"
-	tar -C /usr/local -xzf go1.19.5.src.tar.gz
-	export GOPATH=/root/go
-	echo "export GOPATH=/root/go" >> /root/.bashrc
+	snap install go --classic
+	export GOPATH=/usr/local/go
+	echo "export GOPATH=/usr/local/go" >> /root/.bashrc
 	source /root/.bashrc
 	export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
 	echo "export PATH=$PATH:/usr/local/go/bin:$GOPATH/bin"	>> /root/.bashrc
@@ -118,8 +117,7 @@ else
 	echo -e "\e[92m[~] Installing github-search repo..\e[00m\n"
 	git clone https://github.com/gwen001/github-search.git
 	cd github-search/
-	pip3 install -r requirements3.txt
-	pip2 install -r requirements2.txt
+	pip3 install -r requirements.txt
 	cd ../
 	echo -e "\e[93m[~] Configure github_token in .tokens..\e[00m\n"
 fi
@@ -196,8 +194,7 @@ else
 	echo -e "\e[92m[~] Installing pentest-tools..\e[00m\n"
 	git clone https://github.com/gwen001/pentest-tools.git
 	cd pentest-tools/
-	pip3 install -r requirements3.txt
-	pip2 install -r requirements2.txt
+	pip3 install -r requirements.txt
 	wget https://raw.githubusercontent.com/danielmiessler/SecLists/master/Fuzzing/LFI/LFI-Jhaddix.txt
 	cd ../
 
