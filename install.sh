@@ -50,8 +50,8 @@ if ! command -v go &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find go..Installing..\e[00m\n"
 	cd /root
-	wget "https://go.dev/dl/go1.19.2.linux-amd64.tar.gz"
-	tar -C /usr/local -xzf go1.19.2.linux-amd64.tar.gz
+	wget "https://go.dev/dl/go1.19.5.src.tar.gz"
+	tar -C /usr/local -xzf go1.19.5.src.tar.gz
 	export GOPATH=/root/go
 	echo "export GOPATH=/root/go" >> /root/.bashrc
 	source /root/.bashrc
