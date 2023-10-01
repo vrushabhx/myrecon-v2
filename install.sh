@@ -83,7 +83,8 @@ fi
 if ! command -v amass &> /dev/null
 then
 	echo -e "\e[92m[~] Not able to find amass..Installing..\e[00m\n"
-	snap install amass
+	go install -v github.com/owasp-amass/amass/v4/...@master
+ 	cp /usr/local/go/bin/amass /usr/local/bin/
 	cd /root/scripts/bounty/
 	echo -e "\e[93m[~] Configure API keys for better result..\e[00m\n"
 else
