@@ -1,0 +1,9 @@
+.git
+__pycache__
+*.pyc
+.venv
+tmp.log
+test.sh
+hosts
+next.txt
+*.log

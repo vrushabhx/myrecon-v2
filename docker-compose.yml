@@ -1,0 +1,15 @@
+services:
+  myrecon:
+    build: .
+    container_name: myrecon
+    ports:
+      - "8000:8000"
+    volumes:
+      - scan_data:/data
+      - ./config.yaml:/app/config.yaml
+    environment:
+      - MYRECON_CONFIG=/app/config.yaml
+    restart: unless-stopped
+
+volumes:
+  scan_data:
