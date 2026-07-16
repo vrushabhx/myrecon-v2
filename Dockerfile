@@ -1,7 +1,7 @@
 ### Stage 1: Build Go tools
 FROM golang:1.24-bookworm AS go-builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends libpcap-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends libpcap-dev git && rm -rf /var/lib/apt/lists/*
 
 ENV CGO_ENABLED=0
 
@@ -29,6 +29,19 @@ RUN CGO_ENABLED=1 go install -v github.com/sensepost/gowitness@latest || true
 # amass
 RUN go install -v github.com/owasp-amass/amass/v4/...@latest || true
 
+# Subdomain bruteforce and takeover tools
+RUN go install -v github.com/d3mondev/puredns/v2@latest || true
+RUN go install -v github.com/projectdiscovery/shuffledns/cmd/shuffledns@latest || true
+RUN go install -v github.com/haccer/subjack@latest || true
+
+
+### Stage 1b: Build massdns from source
+FROM golang:1.24-bookworm AS massdns-builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends git make gcc && rm -rf /var/lib/apt/lists/*
+RUN git clone --depth 1 https://github.com/blechschmidt/massdns.git /tmp/massdns && \
+    cd /tmp/massdns && make && cp bin/massdns /usr/local/bin/massdns
+
 
 ### Stage 2: Runtime
 FROM python:3.12-slim-bookworm
@@ -44,11 +57,23 @@ RUN pip install --no-cache-dir sqlmap arjun
 # Copy Go-built binaries
 COPY --from=go-builder /go/bin/ /usr/local/bin/
 
+# Copy massdns binary
+COPY --from=massdns-builder /usr/local/bin/massdns /usr/local/bin/massdns
+
 # gf patterns for vulnerability detection
 RUN git clone --depth 1 https://github.com/1ndianl33t/Gf-Patterns /tmp/gf-patterns && \
     mkdir -p /root/.gf && \
     cp /tmp/gf-patterns/*.json /root/.gf/ && \
     rm -rf /tmp/gf-patterns
+
+# Download DNS wordlists and resolvers
+RUN mkdir -p /app/wordlists /app/payloads && \
+    curl -sL "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/DNS/subdomains-top1million-110000.txt" \
+        -o /app/wordlists/dns_subdomains.txt && \
+    curl -sL "https://raw.githubusercontent.com/trickest/resolvers/main/resolvers-trusted.txt" \
+        -o /app/wordlists/resolvers.txt && \
+    curl -sL "https://raw.githubusercontent.com/danielmiessler/SecLists/master/Discovery/Web-Content/common.txt" \
+        -o /app/wordlists/paths.txt
 
 WORKDIR /app
 

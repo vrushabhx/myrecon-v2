@@ -1,11 +1,7 @@
-import re
 from pathlib import Path
 from myrecon.modules.base import BaseModule, logger
 from myrecon.models import Scan, Finding, Severity
-from myrecon.utils import run_tool, tool_exists, dedup_lines, write_lines
-
-
-STATIC_EXT = re.compile(r"\.(jpg|jpeg|png|svg|gif|ttf|css|woff|woff2|eot|mp[34]|pdf|exe)$", re.I)
+from myrecon.utils import run_tool, tool_exists, dedup_lines, write_lines, filter_static_urls
 
 
 class UrlCollectionModule(BaseModule):
@@ -54,12 +50,12 @@ class UrlCollectionModule(BaseModule):
         else:
             await self.progress("gospider not installed, skipping")
 
-        filtered = [u for u in all_urls if not STATIC_EXT.search(u)]
+        filtered = filter_static_urls(all_urls)
         parameterized = [u for u in filtered if "=" in u]
         unique_all = dedup_lines(filtered)
         unique_params = dedup_lines(parameterized)
 
-        scan.urls = unique_all
+        scan.urls = dedup_lines(scan.urls + unique_all)
         write_lines(str(url_dir / "all_urls.txt"), unique_all)
         write_lines(str(url_dir / "parameterized.txt"), unique_params)
 

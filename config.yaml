@@ -14,6 +14,12 @@ tools:
   timeout: 3600
   nuclei_severity: "critical,high,medium,low"
   user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
+  dns_wordlist: "/app/wordlists/dns_subdomains.txt"
+  resolvers: "/app/wordlists/resolvers.txt"
+  max_sqlmap_urls: 100
+  max_redirect_urls: 50
+  max_lfi_urls: 50
+  max_ssti_urls: 50
 
 tokens:
   github_token: ""
@@ -22,13 +28,18 @@ tokens:
 scan_defaults:
   modules:
     - subdomain
+    - subdomain_bruteforce
     - probing
     - portscan
     - screenshot
     - dirbrute
-    - url_collection
     - js_discovery
+    - csp_extraction
+    - url_collection
     - vuln_scan
+    - subdomain_takeover
+    - cloud_enum
+    - github_recon
   wordlist: "/app/wordlists/paths.txt"
   excluded_subdomains: []
 

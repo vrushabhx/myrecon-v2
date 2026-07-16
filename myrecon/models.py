@@ -49,6 +49,7 @@ class ModuleResult(BaseModel):
     findings_count: int = 0
     output_files: list[str] = Field(default_factory=list)
     error: Optional[str] = None
+    skip_reason: Optional[str] = None
 
 
 class ScanRequest(BaseModel):
@@ -72,6 +73,10 @@ class Scan(BaseModel):
     live_hosts: list[str] = Field(default_factory=list)
     urls: list[str] = Field(default_factory=list)
     open_ports: dict[str, list[int]] = Field(default_factory=dict)
+    js_endpoints: list[str] = Field(default_factory=list)
+    js_domains: list[str] = Field(default_factory=list)
+    csp_domains: list[str] = Field(default_factory=list)
+    brute_subdomains: list[str] = Field(default_factory=list)
     created_at: str = Field(default_factory=lambda: datetime.utcnow().isoformat())
     started_at: Optional[str] = None
     finished_at: Optional[str] = None

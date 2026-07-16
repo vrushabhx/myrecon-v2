@@ -1,9 +1,16 @@
 import asyncio
 import logging
+import re
 import shutil
 from pathlib import Path
+from urllib.parse import urlparse
 
 logger = logging.getLogger("myrecon")
+
+STATIC_EXT = re.compile(
+    r"\.(jpg|jpeg|png|svg|gif|ico|ttf|css|woff|woff2|eot|mp[34]|pdf|exe|zip|gz|tar|bz2|rar|7z|webp|avif)$",
+    re.I,
+)
 
 
 def tool_exists(name: str) -> bool:
@@ -68,3 +75,23 @@ def merge_files(output: str, *inputs: str) -> list[str]:
     result = dedup_lines(all_lines)
     write_lines(output, result)
     return result
+
+
+def filter_static_urls(urls: list[str]) -> list[str]:
+    return [u for u in urls if not STATIC_EXT.search(u)]
+
+
+def extract_domain(url: str) -> str:
+    try:
+        parsed = urlparse(url)
+        return parsed.hostname or ""
+    except Exception:
+        return ""
+
+
+def url_origin(url: str) -> str:
+    try:
+        parsed = urlparse(url)
+        return f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+    except Exception:
+        return url
