@@ -16,16 +16,19 @@ class DirbruteModule(BaseModule):
 
         if not scan.live_hosts or not tool_exists("ffuf"):
             if not tool_exists("ffuf"):
-                logger.warning("ffuf not installed")
+                await self.progress("ffuf not installed, skipping")
+            else:
+                await self.progress("No live hosts for directory bruteforce")
             return findings
 
         wordlist = scan.config.get("wordlist") or "/app/wordlists/paths.txt"
         ua = scan.config.get("tools", {}).get("user_agent", "Mozilla/5.0")
         threads = min(scan.config.get("tools", {}).get("threads", 50), 100)
+        target_count = min(len(scan.live_hosts), 50)
 
         total_found = 0
         for i, host in enumerate(scan.live_hosts[:50]):
-            logger.info(f"ffuf [{i+1}/{min(len(scan.live_hosts),50)}]: {host}")
+            await self.progress(f"ffuf [{i+1}/{target_count}]: {host}")
             out_file = dir_dir / f"ffuf_{host.replace('://', '_').replace('/', '_')}.json"
             code, stdout, _ = await run_tool(
                 ["ffuf", "-u", f"{host}/FUZZ", "-w", wordlist,

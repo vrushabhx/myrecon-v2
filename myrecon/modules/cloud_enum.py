@@ -20,6 +20,7 @@ class CloudEnumModule(BaseModule):
             for provider, flag in [("aws", "--disable-azure --disable-gcp"),
                                    ("gcp", "--disable-azure --disable-aws"),
                                    ("azure", "--disable-aws --disable-gcp")]:
+                await self.progress(f"Scanning {provider.upper()} storage for '{keyword}'...")
                 out = cloud_dir / f"{provider}.txt"
                 cmd = ["cloud_enum", "-k", keyword, "-l", str(out), "-t", "20"]
                 cmd.extend(flag.split())
@@ -36,6 +37,6 @@ class CloudEnumModule(BaseModule):
                             evidence=content[:2000],
                         ))
         else:
-            logger.warning("cloud_enum not installed, skipping cloud enumeration")
+            await self.progress("cloud_enum not installed, skipping cloud enumeration")
 
         return findings

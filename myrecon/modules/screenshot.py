@@ -15,20 +15,23 @@ class ScreenshotModule(BaseModule):
         ss_dir.mkdir(parents=True, exist_ok=True)
 
         if not scan.live_hosts:
+            await self.progress("No live hosts for screenshots")
             return findings
 
         input_file = ss_dir / "targets.txt"
         write_lines(str(input_file), scan.live_hosts)
 
         if tool_exists("gowitness"):
+            await self.progress(f"Running gowitness on {len(scan.live_hosts)} hosts...")
             await self._run_gowitness(input_file, ss_dir)
+            await self.progress("Screenshots complete")
             findings.append(self.make_finding(
                 title=f"Screenshots: captured {len(scan.live_hosts)} hosts",
                 severity=Severity.INFO,
                 target=scan.domain,
             ))
         else:
-            logger.warning("gowitness not installed, skipping screenshots")
+            await self.progress("gowitness not installed, skipping screenshots")
 
         return findings
 

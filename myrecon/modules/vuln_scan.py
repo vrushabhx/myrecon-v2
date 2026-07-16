@@ -24,19 +24,34 @@ class VulnScanModule(BaseModule):
         vuln_dir.mkdir(parents=True, exist_ok=True)
 
         if tool_exists("nuclei"):
+            await self.progress("Running nuclei vulnerability scanner...")
             f = await self._run_nuclei(scan, vuln_dir)
             findings.extend(f)
+            await self.progress(f"nuclei found {len(f)} issues")
+        else:
+            await self.progress("nuclei not installed, skipping")
 
         if tool_exists("crlfuzz"):
+            await self.progress("Running crlfuzz...")
             f = await self._run_crlfuzz(scan, vuln_dir)
             findings.extend(f)
+            await self.progress(f"crlfuzz found {len(f)} issues")
+        else:
+            await self.progress("crlfuzz not installed, skipping")
 
         if tool_exists("kxss"):
+            await self.progress("Running XSS reflection check...")
             f = await self._run_xss_check(scan, vuln_dir)
             findings.extend(f)
+            await self.progress(f"XSS check found {len(f)} issues")
+        else:
+            await self.progress("kxss not installed, skipping XSS check")
 
+        await self.progress("Running gf pattern matching...")
         f = await self._run_gf_patterns(scan, vuln_dir)
         findings.extend(f)
+        if f:
+            await self.progress(f"gf patterns found {len(f)} potential targets")
 
         return findings
 

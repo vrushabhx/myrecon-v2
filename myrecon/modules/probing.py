@@ -15,19 +15,24 @@ class ProbingModule(BaseModule):
         probe_dir.mkdir(parents=True, exist_ok=True)
 
         if not scan.subdomains:
-            logger.warning("No subdomains to probe")
+            await self.progress("No subdomains to probe")
             return findings
 
+        await self.progress(f"Probing {len(scan.subdomains)} subdomains for live hosts...")
         input_file = probe_dir / "input.txt"
         write_lines(str(input_file), scan.subdomains)
 
         live = []
         if tool_exists("httpx"):
+            await self.progress("Running httpx...")
             live = await self._run_httpx(input_file, probe_dir)
+            await self.progress(f"httpx found {len(live)} live hosts")
         elif tool_exists("httprobe"):
+            await self.progress("Running httprobe...")
             live = await self._run_httprobe(input_file, probe_dir)
+            await self.progress(f"httprobe found {len(live)} live hosts")
         else:
-            logger.error("Neither httpx nor httprobe installed")
+            await self.progress("Neither httpx nor httprobe installed")
             return findings
 
         scan.live_hosts = live

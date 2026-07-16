@@ -19,6 +19,7 @@ class UrlCollectionModule(BaseModule):
         url_dir.mkdir(parents=True, exist_ok=True)
 
         if not scan.live_hosts:
+            await self.progress("No live hosts for URL collection")
             return findings
 
         stripped = [h.replace("https://", "").replace("http://", "").split("/")[0]
@@ -30,16 +31,28 @@ class UrlCollectionModule(BaseModule):
         all_urls = []
 
         if tool_exists("waybackurls"):
+            await self.progress("Running waybackurls...")
             urls = await self._run_waybackurls(input_file, url_dir)
             all_urls.extend(urls)
+            await self.progress(f"waybackurls collected {len(urls)} URLs")
+        else:
+            await self.progress("waybackurls not installed, skipping")
 
         if tool_exists("gau"):
+            await self.progress("Running gau...")
             urls = await self._run_gau(input_file, url_dir)
             all_urls.extend(urls)
+            await self.progress(f"gau collected {len(urls)} URLs")
+        else:
+            await self.progress("gau not installed, skipping")
 
         if tool_exists("gospider"):
+            await self.progress(f"Running gospider on {min(30, len(scan.live_hosts))} hosts...")
             urls = await self._run_gospider(scan.live_hosts[:30], url_dir)
             all_urls.extend(urls)
+            await self.progress(f"gospider collected {len(urls)} URLs")
+        else:
+            await self.progress("gospider not installed, skipping")
 
         filtered = [u for u in all_urls if not STATIC_EXT.search(u)]
         parameterized = [u for u in filtered if "=" in u]

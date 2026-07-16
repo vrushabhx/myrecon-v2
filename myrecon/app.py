@@ -87,6 +87,22 @@ async def api_report(scan_id: str, format: str = "html"):
     return HTMLResponse(content=generate_html_report(scan))
 
 
+@app.get("/api/tools-check")
+async def api_tools_check():
+    import shutil
+    tools = [
+        "subfinder", "assetfinder", "amass", "findomain", "httpx", "httprobe",
+        "naabu", "nmap", "ffuf", "nuclei", "waybackurls", "gau", "gospider",
+        "gowitness", "crlfuzz", "dalfox", "kxss", "gf", "qsreplace", "unfurl",
+        "trufflehog", "cloud_enum", "linkfinder", "sqlmap",
+    ]
+    result = {}
+    for t in tools:
+        result[t] = shutil.which(t) is not None
+    installed = sum(1 for v in result.values() if v)
+    return {"tools": result, "installed": installed, "total": len(tools)}
+
+
 @app.websocket("/ws/scans/{scan_id}")
 async def ws_scan(websocket: WebSocket, scan_id: str):
     await websocket.accept()
@@ -99,7 +115,20 @@ async def ws_scan(websocket: WebSocket, scan_id: str):
     try:
         scan = get_scan(scan_id)
         if scan:
-            await websocket.send_json({"type": "status", "data": json.loads(scan.model_dump_json())})
+            modules_status = {}
+            for name, result in scan.module_results.items():
+                modules_status[name] = result.status.value
+            await websocket.send_json({
+                "type": "status",
+                "scan_status": scan.status.value,
+                "modules": modules_status,
+                "stats": {
+                    "subdomains": len(scan.subdomains),
+                    "live_hosts": len(scan.live_hosts),
+                    "open_ports": sum(len(p) for p in scan.open_ports.values()),
+                    "findings": len(scan.findings),
+                },
+            })
 
         while True:
             try:
@@ -247,24 +276,32 @@ th {{ background:#161b22; color:#58a6ff; }}
 .status-running {{ color:#d29922; }} .status-completed {{ color:#3fb950; }}
 .status-failed {{ color:#f85149; }} .status-pending {{ color:#8b949e; }}
 .stats {{ display:flex; gap:12px; margin:16px 0; flex-wrap:wrap; }}
-.stat {{ background:#161b22; border:1px solid #21262d; border-radius:8px; padding:14px 20px; text-align:center; }}
+.stat {{ background:#161b22; border:1px solid #21262d; border-radius:8px; padding:14px 20px; text-align:center; min-width:120px; }}
 .stat b {{ display:block; font-size:1.6em; color:#58a6ff; }}
+.stat span {{ color:#8b949e; font-size:0.85em; }}
 .btn {{ display:inline-block; background:#238636; color:#fff; padding:8px 18px; border-radius:6px; font-weight:600; margin:4px; }}
 .btn-red {{ background:#da3633; }}
-#log {{ background:#161b22; padding:10px; border-radius:6px; max-height:200px; overflow-y:auto; font-family:monospace; font-size:0.85em; }}
+#log {{ background:#0d1117; border:1px solid #21262d; padding:12px; border-radius:6px; max-height:400px; overflow-y:auto; font-family:'Cascadia Code','Fira Code',monospace; font-size:0.85em; line-height:1.6; }}
+#log .log-time {{ color:#484f58; }}
+#log .log-started {{ color:#58a6ff; }}
+#log .log-progress {{ color:#c9d1d9; }}
+#log .log-completed {{ color:#3fb950; font-weight:600; }}
+#log .log-failed {{ color:#f85149; font-weight:600; }}
+#log .log-status {{ color:#8b949e; }}
+#log .log-module {{ color:#d2a8ff; }}
 </style>
 </head>
 <body>
 <div class="container">
 <p><a href="/">&larr; Dashboard</a></p>
 <h1>{_esc(scan.domain)}</h1>
-<p style="color:#8b949e">ID: {scan.id} | Status: <span class="{status_class}">{scan.status.value.upper()}</span> | {scan.created_at[:19]}</p>
+<p style="color:#8b949e">ID: {scan.id} | Status: <span class="{status_class}" id="scan-status">{scan.status.value.upper()}</span> | {scan.created_at[:19]}</p>
 
 <div class="stats">
-<div class="stat"><b>{len(scan.subdomains)}</b>Subdomains</div>
-<div class="stat"><b>{len(scan.live_hosts)}</b>Live Hosts</div>
-<div class="stat"><b>{sum(len(p) for p in scan.open_ports.values())}</b>Open Ports</div>
-<div class="stat"><b>{len(scan.findings)}</b>Findings</div>
+<div class="stat"><b id="stat-subs">{len(scan.subdomains)}</b><span>Subdomains</span></div>
+<div class="stat"><b id="stat-hosts">{len(scan.live_hosts)}</b><span>Live Hosts</span></div>
+<div class="stat"><b id="stat-ports">{sum(len(p) for p in scan.open_ports.values())}</b><span>Open Ports</span></div>
+<div class="stat"><b id="stat-findings">{len(scan.findings)}</b><span>Findings</span></div>
 </div>
 
 <a href="/api/scans/{scan.id}/report" class="btn">HTML Report</a>
@@ -272,34 +309,124 @@ th {{ background:#161b22; color:#58a6ff; }}
 {f'<button class="btn btn-red" onclick="cancelScan()">Cancel</button>' if scan.status.value == "running" else ''}
 
 <h2>Modules</h2>
-<table><tr><th>Module</th><th>Status</th><th>Findings</th></tr>{module_rows}</table>
+<table id="modules-table"><tr><th>Module</th><th>Status</th><th>Findings</th></tr>{module_rows}</table>
 
 <h2>Live Log</h2>
-<div id="log">Connecting...</div>
+<div id="log"></div>
 
-<h2>Findings ({len(scan.findings)})</h2>
+<h2>Findings (<span id="findings-count">{len(scan.findings)}</span>)</h2>
+<div id="findings-list">
 {findings_html if findings_html else '<p style="color:#8b949e">No findings yet.</p>'}
+</div>
 </div>
 <script>
 const scanId = "{scan.id}";
 const logEl = document.getElementById('log');
+let wsConnected = false;
+
+function addLog(text, cls) {{
+    const line = document.createElement('div');
+    const time = new Date().toLocaleTimeString();
+    line.innerHTML = '<span class="log-time">[' + time + ']</span> <span class="' + cls + '">' + text + '</span>';
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+}}
+
+function updateStats(stats) {{
+    if (!stats) return;
+    if (stats.subdomains !== undefined) document.getElementById('stat-subs').textContent = stats.subdomains;
+    if (stats.live_hosts !== undefined) document.getElementById('stat-hosts').textContent = stats.live_hosts;
+    if (stats.open_ports !== undefined) document.getElementById('stat-ports').textContent = stats.open_ports;
+    if (stats.findings !== undefined) {{
+        document.getElementById('stat-findings').textContent = stats.findings;
+        document.getElementById('findings-count').textContent = stats.findings;
+    }}
+}}
+
+function updateModuleRow(module, status) {{
+    const table = document.getElementById('modules-table');
+    const rows = table.querySelectorAll('tr');
+    for (let r of rows) {{
+        const cells = r.querySelectorAll('td');
+        if (cells.length && cells[0].textContent === module) {{
+            cells[1].className = 'status-' + status;
+            cells[1].textContent = status;
+            return;
+        }}
+    }}
+}}
+
 function connectWS() {{
-    const ws = new WebSocket(`ws://${{location.host}}/ws/scans/${{scanId}}`);
+    addLog('Connecting to scan...', 'log-status');
+    const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(proto + '//' + location.host + '/ws/scans/' + scanId);
+
+    ws.onopen = () => {{
+        wsConnected = true;
+        addLog('Connected', 'log-status');
+    }};
+
     ws.onmessage = e => {{
         const d = JSON.parse(e.data);
         if (d.type === 'ping') return;
-        const line = document.createElement('div');
-        line.textContent = `[${{new Date().toLocaleTimeString()}}] ${{d.type}}: ${{JSON.stringify(d)}}`;
-        logEl.appendChild(line);
-        logEl.scrollTop = logEl.scrollHeight;
-        if (d.type === 'completed' || d.type === 'cancelled') setTimeout(()=>location.reload(), 1000);
+
+        switch(d.type) {{
+            case 'status':
+                addLog('Scan status: ' + (d.scan_status || 'unknown').toUpperCase(), 'log-status');
+                if (d.modules) {{
+                    for (const [mod, st] of Object.entries(d.modules)) {{
+                        if (st !== 'pending') addLog('  ' + mod + ': ' + st, 'log-status');
+                    }}
+                }}
+                updateStats(d.stats);
+                break;
+            case 'started':
+                addLog('Scan started', 'log-started');
+                break;
+            case 'module_started':
+                addLog('Starting module: ' + d.module, 'log-started');
+                updateModuleRow(d.module, 'running');
+                break;
+            case 'progress':
+                addLog('[' + d.module + '] ' + d.message, 'log-progress');
+                break;
+            case 'module_completed':
+                addLog('Module completed: ' + d.module + ' (' + d.findings_count + ' findings)', 'log-completed');
+                updateModuleRow(d.module, 'completed');
+                updateStats(d.stats);
+                break;
+            case 'module_failed':
+                addLog('Module FAILED: ' + d.module + ' (' + (d.error || 'unknown error') + ')', 'log-failed');
+                updateModuleRow(d.module, 'failed');
+                break;
+            case 'completed':
+                addLog('Scan completed! ' + d.total_findings + ' total findings', 'log-completed');
+                document.getElementById('scan-status').textContent = 'COMPLETED';
+                document.getElementById('scan-status').className = 'status-completed';
+                setTimeout(() => location.reload(), 2000);
+                break;
+            case 'cancelled':
+                addLog('Scan cancelled', 'log-failed');
+                setTimeout(() => location.reload(), 1000);
+                break;
+            default:
+                addLog(d.type + ': ' + JSON.stringify(d), 'log-status');
+        }}
     }};
-    ws.onclose = () => {{ logEl.innerHTML += '<div>Connection closed. Refreshing...</div>'; setTimeout(()=>location.reload(), 3000); }};
-    ws.onerror = () => {{ logEl.innerHTML += '<div>WebSocket error</div>'; }};
+
+    ws.onclose = () => {{
+        if (wsConnected) {{
+            addLog('Connection closed', 'log-status');
+            wsConnected = false;
+        }}
+    }};
+    ws.onerror = () => {{ addLog('WebSocket error, retrying...', 'log-failed'); }};
 }}
+
 connectWS();
+
 async function cancelScan() {{
-    await fetch(`/api/scans/${{scanId}}`, {{method:'DELETE'}});
+    await fetch('/api/scans/' + scanId, {{method:'DELETE'}});
     location.reload();
 }}
 </script>

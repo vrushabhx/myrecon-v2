@@ -18,15 +18,18 @@ class PortscanModule(BaseModule):
                  for h in scan.live_hosts]
         hosts = list(set(hosts))
         if not hosts:
-            logger.warning("No hosts for port scanning")
+            await self.progress("No hosts for port scanning")
             return findings
 
         input_file = port_dir / "hosts.txt"
         write_lines(str(input_file), hosts)
 
         if tool_exists("naabu"):
+            await self.progress(f"Running naabu on {len(hosts)} hosts...")
             naabu_results = await self._run_naabu(input_file, port_dir)
             scan.open_ports = naabu_results
+            total_open = sum(len(p) for p in naabu_results.values())
+            await self.progress(f"naabu found {total_open} open ports across {len(naabu_results)} hosts")
 
             all_targets = []
             all_ports = set()
@@ -35,7 +38,9 @@ class PortscanModule(BaseModule):
                 all_ports.update(ports)
 
             if all_targets and all_ports and tool_exists("nmap"):
+                await self.progress(f"Running nmap service detection on {len(all_ports)} ports...")
                 await self._run_nmap(all_targets, all_ports, port_dir)
+                await self.progress("nmap service detection complete")
 
             total_open = sum(len(p) for p in naabu_results.values())
             findings.append(self.make_finding(
@@ -46,7 +51,7 @@ class PortscanModule(BaseModule):
                 evidence="\n".join(f"{h}: {','.join(map(str,p))}" for h, p in list(naabu_results.items())[:20]),
             ))
         else:
-            logger.warning("naabu not installed, skipping port scan")
+            await self.progress("naabu not installed, skipping port scan")
 
         return findings
 

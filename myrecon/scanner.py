@@ -139,6 +139,11 @@ async def _run_scan(scan: Scan, notify: bool = True):
 
         try:
             mod_instance = ALL_MODULES[mod_name]()
+
+            async def _progress(msg):
+                await _emit(scan.id, {"type": "progress", "module": mod_name, "message": msg})
+
+            mod_instance._progress_callback = _progress
             new_findings = await mod_instance.run(scan)
             for f in new_findings:
                 scan.add_finding(f)
@@ -149,6 +154,13 @@ async def _run_scan(scan: Scan, notify: bool = True):
                 "type": "module_completed",
                 "module": mod_name,
                 "findings_count": len(new_findings),
+                "stats": {
+                    "subdomains": len(scan.subdomains),
+                    "live_hosts": len(scan.live_hosts),
+                    "open_ports": sum(len(p) for p in scan.open_ports.values()),
+                    "findings": len(scan.findings),
+                    "urls": len(scan.urls),
+                },
             })
             logger.info(f"Scan {scan.id}: {mod_name} completed with {len(new_findings)} findings")
 

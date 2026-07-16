@@ -25,25 +25,29 @@ class SubdomainModule(BaseModule):
 
         for tool_name, runner in tools:
             if not tool_exists(tool_name):
-                logger.warning(f"{tool_name} not installed, skipping")
+                await self.progress(f"{tool_name} not installed, skipping")
                 continue
             try:
+                await self.progress(f"Running {tool_name}...")
                 subs = await runner(scan.domain, sub_dir)
                 all_subs.extend(subs)
-                logger.info(f"{tool_name} found {len(subs)} subdomains")
+                await self.progress(f"{tool_name} found {len(subs)} subdomains")
             except Exception as e:
-                logger.error(f"{tool_name} failed: {e}")
+                await self.progress(f"{tool_name} failed: {e}")
 
         github_token = scan.config.get("tokens", {}).get("github_token", "")
         if github_token:
             try:
+                await self.progress("Running github-subdomains...")
                 subs = await self._run_github_subdomains(scan.domain, github_token, sub_dir)
                 all_subs.extend(subs)
+                await self.progress(f"github-subdomains found {len(subs)} subdomains")
             except Exception as e:
-                logger.error(f"github-subdomains failed: {e}")
+                await self.progress(f"github-subdomains failed: {e}")
 
         unique = dedup_lines(all_subs)
         filtered = [s for s in unique if s.endswith(f".{scan.domain}") or s == scan.domain]
+        await self.progress(f"Total: {len(filtered)} unique subdomains after dedup")
 
         excluded = scan.config.get("excluded_subdomains", [])
         if excluded:

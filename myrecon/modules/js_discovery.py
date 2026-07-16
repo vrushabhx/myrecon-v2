@@ -15,12 +15,14 @@ class JsDiscoveryModule(BaseModule):
         js_dir.mkdir(parents=True, exist_ok=True)
 
         if not scan.live_hosts:
+            await self.progress("No live hosts for JS discovery")
             return findings
 
         if not tool_exists("linkfinder"):
-            logger.warning("linkfinder not installed, skipping JS discovery")
+            await self.progress("linkfinder not installed, skipping JS discovery")
             return findings
 
+        await self.progress(f"Mining JS endpoints from {min(30, len(scan.live_hosts))} hosts...")
         all_endpoints = []
         for host in scan.live_hosts[:30]:
             code, stdout, _ = await run_tool(

@@ -16,11 +16,12 @@ class GithubReconModule(BaseModule):
 
         github_token = scan.config.get("tokens", {}).get("github_token", "")
         if not github_token:
-            logger.warning("No GitHub token configured, skipping GitHub recon")
+            await self.progress("No GitHub token configured, skipping")
             return findings
 
         if tool_exists("gitGraber.py") or tool_exists("trufflehog"):
             if tool_exists("trufflehog"):
+                await self.progress("Running trufflehog for GitHub secret scanning...")
                 code, stdout, _ = await run_tool(
                     ["trufflehog", "github", "--org", scan.domain.split(".")[0],
                      "--token", github_token, "--json"],
@@ -37,6 +38,6 @@ class GithubReconModule(BaseModule):
                         evidence=stdout[:2000],
                     ))
         else:
-            logger.warning("No GitHub recon tools installed (trufflehog), skipping")
+            await self.progress("No GitHub recon tools installed (trufflehog), skipping")
 
         return findings
