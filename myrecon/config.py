@@ -18,8 +18,9 @@ def load_config(path: str = None) -> dict:
     if not p.exists():
         p = fallback
 
-    with open(p) as f:
-        _config = yaml.safe_load(f)
+    with open(p, encoding="utf-8") as f:
+        content = f.read().replace("\r\n", "\n")
+        _config = yaml.safe_load(content)
 
     _config.setdefault("data_dir", "/data")
     _config.setdefault("server", {})

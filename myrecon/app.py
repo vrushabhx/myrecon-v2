@@ -154,7 +154,7 @@ def _severity_counts(findings):
 
 
 def _severity_badges_html(counts):
-    colors = {"critical": "#dc3545", "high": "#fd7e14", "medium": "#ffc107", "low": "#17a2b8", "info": "#6c757d"}
+    colors = {"critical": "#dc3545", "high": "#fd7e14", "medium": "#ffc107", "low": "#17a2b8", "info": "#8b949e"}
     badges = []
     for sev in ["critical", "high", "medium", "low", "info"]:
         c = counts.get(sev, 0)
@@ -276,7 +276,7 @@ def _render_scan_detail(scan) -> str:
         module_rows += f"<tr><td>{_esc(name)}</td><td class='{sc}'>{result.status.value}</td><td>{result.findings_count}</td><td>{notes}</td></tr>"
 
     sev_counts = _severity_counts(scan.findings)
-    sev_colors = {"critical": "#dc3545", "high": "#fd7e14", "medium": "#ffc107", "low": "#17a2b8", "info": "#6c757d"}
+    sev_colors = {"critical": "#dc3545", "high": "#fd7e14", "medium": "#ffc107", "low": "#17a2b8", "info": "#8b949e"}
 
     sev_bar_segments = ""
     total_findings = len(scan.findings) or 1
@@ -347,6 +347,12 @@ th {{ background:#161b22; color:#58a6ff; }}
 <h1>{_esc(scan.domain)}</h1>
 <p style="color:#8b949e">ID: {scan.id} | Status: <span class="{status_class}" id="scan-status">{scan.status.value.upper()}</span> | {scan.created_at[:19]}</p>
 
+<nav style="margin:12px 0;display:flex;gap:8px;flex-wrap:wrap">
+<a href="#modules-section" style="background:#21262d;color:#c9d1d9;padding:4px 12px;border-radius:6px;font-size:0.85em;text-decoration:none">Modules</a>
+<a href="#log-section" style="background:#21262d;color:#c9d1d9;padding:4px 12px;border-radius:6px;font-size:0.85em;text-decoration:none">Live Log</a>
+<a href="#findings-section" style="background:#21262d;color:#58a6ff;padding:4px 12px;border-radius:6px;font-size:0.85em;text-decoration:none;border:1px solid #58a6ff">Findings ({len(scan.findings)})</a>
+</nav>
+
 <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:{progress_pct}%"></div></div>
 <p style="color:#8b949e;font-size:0.85em" id="progress-text">{completed_modules} of {total_modules} modules completed ({progress_pct}%)</p>
 
@@ -367,13 +373,13 @@ th {{ background:#161b22; color:#58a6ff; }}
 {f'<button class="btn btn-red" onclick="cancelScan()">Cancel</button>' if scan.status.value == "running" else ''}
 </div>
 
-<h2>Modules</h2>
+<h2 id="modules-section">Modules</h2>
 <table id="modules-table"><tr><th>Module</th><th>Status</th><th>Findings</th><th>Notes</th></tr>{module_rows}</table>
 
-<h2>Live Log</h2>
+<h2 id="log-section">Live Log</h2>
 <div id="log"></div>
 
-<h2>Findings (<span id="findings-count">{len(scan.findings)}</span>)</h2>
+<h2 id="findings-section">Findings (<span id="findings-count">{len(scan.findings)}</span>)</h2>
 <input type="text" id="search-findings" placeholder="Search findings..." oninput="filterFindings()">
 <div class="filter-btns">
 <span class="filter-btn active" data-sev="all" onclick="toggleSevFilter(this)">All</span>
@@ -381,7 +387,7 @@ th {{ background:#161b22; color:#58a6ff; }}
 <span class="filter-btn" data-sev="high" onclick="toggleSevFilter(this)" style="border-color:#fd7e14">High ({sev_counts.get('high',0)})</span>
 <span class="filter-btn" data-sev="medium" onclick="toggleSevFilter(this)" style="border-color:#ffc107">Medium ({sev_counts.get('medium',0)})</span>
 <span class="filter-btn" data-sev="low" onclick="toggleSevFilter(this)" style="border-color:#17a2b8">Low ({sev_counts.get('low',0)})</span>
-<span class="filter-btn" data-sev="info" onclick="toggleSevFilter(this)" style="border-color:#6c757d">Info ({sev_counts.get('info',0)})</span>
+<span class="filter-btn" data-sev="info" onclick="toggleSevFilter(this)" style="border-color:#8b949e">Info ({sev_counts.get('info',0)})</span>
 </div>
 <div id="findings-list">
 {findings_html if findings_html else '<p style="color:#8b949e">No findings yet.</p>'}

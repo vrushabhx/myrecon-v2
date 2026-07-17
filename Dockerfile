@@ -82,6 +82,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Fix Windows line endings (CRLF -> LF) on text files
+RUN find /app -type f \( -name "*.py" -o -name "*.yaml" -o -name "*.yml" -o -name "*.txt" -o -name "*.json" \) -exec sed -i 's/\r$//' {} +
+
 # Download pre-built ProjectDiscovery binaries AFTER pip install
 # (pip httpx library installs a CLI wrapper that overwrites Go httpx)
 RUN ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
