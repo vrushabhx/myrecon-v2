@@ -1,5 +1,5 @@
 server:
-  host: "0.0.0.0"
+  host: 0.0.0.0
   port: 8000
   api_key: ""
 
@@ -12,10 +12,10 @@ notifications:
 tools:
   threads: 50
   timeout: 3600
-  nuclei_severity: "critical,high,medium,low"
-  user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
-  dns_wordlist: "/app/wordlists/dns_subdomains.txt"
-  resolvers: "/app/wordlists/resolvers.txt"
+  nuclei_severity: critical,high,medium,low
+  user_agent: 'Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0'
+  dns_wordlist: /app/wordlists/dns_subdomains.txt
+  resolvers: /app/wordlists/resolvers.txt
   max_sqlmap_urls: 100
   max_redirect_urls: 50
   max_lfi_urls: 50
@@ -40,7 +40,7 @@ scan_defaults:
     - subdomain_takeover
     - cloud_enum
     - github_recon
-  wordlist: "/app/wordlists/paths.txt"
+  wordlist: /app/wordlists/paths.txt
   excluded_subdomains: []
 
-data_dir: "/data"
+data_dir: /data
